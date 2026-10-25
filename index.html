@@ -82,18 +82,37 @@ select.sel{border:1px solid var(--line);background:var(--card);border-radius:10p
 .loading{padding:60px 20px;text-align:center;color:var(--mut)}.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 12px}@keyframes sp{to{transform:rotate(360deg)}}
 @media (max-width:1100px){.dbody{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
 @media (max-width:760px){.g2{grid-template-columns:1fr}.dpanel{inset:0;border-radius:0}.chartwrap{height:400px}.tick.eth,.status .txt{display:none}.big{font-size:24px}main{padding:12px}.sec{grid-template-columns:84px 1fr 1fr 60px}.bar{gap:8px}}
+
+/* time machine + risk */
+.tick.trend.on{border-color:color-mix(in srgb,var(--bull) 45%,var(--line))}.tick.trend.off{border-color:color-mix(in srgb,var(--bear) 45%,var(--line))}
+.tmbtn{margin-left:auto;border:1px solid var(--line);background:var(--card2);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--acc)}
+.tmbtn:hover{border-color:var(--acc);background:var(--acc-s)}.tmbtn.sm{padding:1px 7px;margin-left:4px}
+.btn{border:0;background:var(--acc);color:#fff;border-radius:10px;padding:9px 16px;font-weight:700;font-size:14px}.btn:hover{filter:brightness(1.08)}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.form input,.form select{border:1px solid var(--line);background:var(--card2);border-radius:10px;padding:8px 10px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--txt);outline:none;width:100%}
+.form input:focus,.form select:focus{border-color:var(--acc)}
+.form label.chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;font-size:13px;font-weight:600;align-self:end;padding-bottom:9px}.form label.chk input{width:auto}
+details.manual{margin-top:12px;border:1px dashed var(--line);border-radius:12px;padding:8px 12px}details.manual summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--mut)}details.manual .form{margin-top:10px}
+.callout.g{background:var(--bull-s);border-color:var(--bull)}.warn-t{color:var(--warn)}
+svg.chart{display:block;width:100%;height:auto;margin-top:6px}svg.chart .ax{font-size:11px;fill:var(--mut);font-family:inherit}
+.verdict{display:flex;flex-direction:column;gap:2px;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px}.verdict b{font-size:16px}
+.verdict.bull{background:var(--bull-s)}.verdict.bull b{color:var(--bull)}.verdict.warn{background:var(--warn-s)}.verdict.warn b{color:var(--warn)}.verdict.bear{background:var(--bear-s)}.verdict.bear b{color:var(--bear)}
+ul.reasons{margin:8px 0 0;padding-left:18px;font-size:12px;color:var(--bear)}
+td .why{font-size:12px;white-space:normal;display:inline-block;max-width:280px;vertical-align:middle}
+@media (max-width:760px){.form{grid-template-columns:1fr 1fr}.tick.trend .dim{display:none}}
 </style></head>
 <body>
 <header class="top"><div class="bar">
   <div class="brand"><div class="logo">OB</div><span>Order Block Scanner</span><span class="pill acc">LIVE</span></div>
-  <div class="tick" id="tbtc">BTC</div><div class="tick eth" id="teth">ETH</div>
+  <div class="tick" id="tbtc">BTC</div><div class="tick eth" id="teth">ETH</div><div class="tick trend" id="btctrend"><span class="mut">BTC trend</span> <b>–</b></div>
   <div class="spacer"></div>
   <div class="status" id="st"></div><span class="mut num" style="font-size:12px" id="upd">Loading…</span><b class="num" id="clock" style="font-size:13px"></b>
   <button class="iconbtn" id="bnotify" title="Browser notifications for top-coin signals">🔕 Alerts</button>
   <button class="iconbtn" id="bsound" title="Play a sound on signals">♪ Sound</button>
   <button class="iconbtn" id="theme" title="Light or dark">☾</button>
 </div>
-<nav class="tabs"><button data-tab="scanner" class="on">Scanner</button><button data-tab="signals">Signals <span class="badge" id="sigbadge" style="display:none"></span></button><button data-tab="liq">Liquidations</button><button data-tab="bt">Backtest</button><button data-tab="about">How it works</button></nav></header>
+<nav class="tabs"><button data-tab="scanner" class="on">Scanner</button><button data-tab="signals">Signals <span class="badge" id="sigbadge" style="display:none"></span></button><button data-tab="tm">⏱ Time Machine</button><button data-tab="risk">Risk</button><button data-tab="liq">Liquidations</button><button data-tab="bt">Backtest</button><button data-tab="about">How it works</button></nav></header>
 <main>
 <section id="v-scanner">
   <div id="loading" class="loading"><div class="spin"></div><div id="loadmsg">Connecting to Binance…</div></div>
@@ -109,6 +128,8 @@ select.sel{border:1px solid var(--line);background:var(--card);border-radius:10p
   </div>
 </section>
 <section id="v-signals" style="display:none"></section>
+<section id="v-tm" style="display:none"></section>
+<section id="v-risk" style="display:none"></section>
 <section id="v-liq" style="display:none"></section>
 <section id="v-bt" style="display:none"></section>
 <section id="v-about" style="display:none"></section>
@@ -593,7 +614,7 @@ const render = {
   },
   lists() {
     const tbl = (list, side) => `<div class="tw"><table><thead><tr><th>#</th><th>Coin</th><th class="r">Price</th><th class="r">24h</th><th class="r">vs VWAP</th><th class="r">Score</th><th>Build-up</th><th>Signal</th></tr></thead><tbody>` +
-      (list.length ? list.slice(0, TOP).map((s, i) => { const c = S.coins.get(s); return `<tr class="click" data-open="${s}"><td class="mut">${i + 1}</td><td><b>${c.base}</b> <span class="dim">${c.sector}</span></td><td class="r num">${px(c, c.last)}</td><td class="r num ${cls(c.chg24)}">${pct(c.chg24)}</td><td class="r num ${cls(c.vwapDist)}">${pct(c.vwapDist)}</td><td class="r num"><b class="${side === "bull" ? "up" : "dn"}">${scoreOf(c)}</b></td><td><span class="pill ${buTone(c.buildup)}">${c.buildup}</span></td><td>${c.ev ? `<span class="pill ${stTone(c.ev)}">${shortState(c.ev.state)}</span>` : ""}</td></tr>`; }).join("") : `<tr><td colspan="8" class="empty">No coins qualify right now</td></tr>`) + `</tbody></table></div>`;
+      (list.length ? list.slice(0, TOP).map((s, i) => { const c = S.coins.get(s); return `<tr class="click" data-open="${s}"><td class="mut">${i + 1}</td><td><b>${c.base}</b> <span class="dim">${c.sector}</span></td><td class="r num">${px(c, c.last)}</td><td class="r num ${cls(c.chg24)}">${pct(c.chg24)}</td><td class="r num ${cls(c.vwapDist)}">${pct(c.vwapDist)}</td><td class="r num"><b class="${side === "bull" ? "up" : "dn"}">${scoreOf(c)}</b></td><td><span class="pill ${buTone(c.buildup)}">${c.buildup}</span></td><td>${c.ev ? `<span class="pill ${stTone(c.ev)}">${shortState(c.ev.state)}</span>` : ""} <button class="tmbtn sm" data-tm="${s}" data-side="${side}" title="Time Machine replay">⏱</button></td></tr>`; }).join("") : `<tr><td colspan="8" class="empty">No coins qualify right now</td></tr>`) + `</tbody></table></div>`;
     $("#lbull").innerHTML = `<h3><span class="up">▲ Top ${TOP} bullish</span><span class="r mut">${S.bull.length} qualify · score > 0, above VWAP</span></h3>` + tbl(S.bull, "bull");
     $("#lbear").innerHTML = `<h3><span class="dn">▼ Top ${TOP} bearish</span><span class="r mut">${S.bear.length} qualify · score < 0, below VWAP</span></h3>` + tbl(S.bear, "bear");
   },
@@ -621,7 +642,7 @@ const render = {
           <span>Taker flow 1h</span><b class="num ${cls(c.delta1h)}">${usd(c.delta1h)}</b>
         </div>
         ${spark(closes)}
-        <div class="f">${ev ? `<span class="pill ${stTone(ev)}">${shortState(ev.state)}</span>` : ""}</div>
+        <div class="f">${ev ? `<span class="pill ${stTone(ev)}">${shortState(ev.state)}</span>` : ""}${ev && ev.state !== "Waiting" ? trendTag(ev.want, true) : ""}<button class="tmbtn" data-tm="${c.sym}" data-side="${ev ? ev.want : c.bias}" title="Time Machine: replay this setup on ${c.base}'s past candles">⏱ Replay</button></div>
       </div>`; }).join("") : `<div class="empty">No coins match.</div>`;
   },
   scanner() { if (!S.rows) return; render.bias(); render.sectors(); render.lists(); render.cards(); },
@@ -629,7 +650,7 @@ const render = {
     const L = S.log;
     $("#v-signals").innerHTML = `<div class="card"><h3>Signals log <span class="r" style="display:flex;gap:8px;align-items:center"><label class="mut"><input type="checkbox" id="loginfo" ${S.logInfo ? "checked" : ""}> also log coins outside the top lists</label><button class="iconbtn" id="clearlog">Clear</button></span></h3>
     <p class="note">Logged in this browser while the page is open and saved in localStorage. <b>Alert</b> rows come from top-${TOP} coins: either a confirmed reversal off a fresh 5m order block on the right side of VWAP, or a pin-bar exit warning on an open setup. Alert rows trigger a notification and a sound if you turned those on. <b>Zone</b> rows mean a top coin's price entered a zone. <b>Info</b> rows are the same signals on other coins. For 24/7 alerts, run alerts.py on a server.</p>
-    ${L.length ? `<div class="tw"><table><thead><tr><th>Time (IST)</th><th>Coin</th><th>Type</th><th>State</th><th class="r">Price</th><th class="r">Entry</th><th class="r">Stop</th><th class="r">1:2</th><th class="r">1:4.6</th><th>Detail</th></tr></thead><tbody>${L.map(e => { const c = S.coins.get(e.sym); const p = e.plan; return `<tr class="click" data-open="${e.sym}"><td class="num">${dmh(e.t)}</td><td><b>${baseOf(e.sym)}</b></td><td><span class="pill ${e.level === "alert" ? "acc" : e.level === "zone" ? "warn" : ""}">${e.level}</span></td><td>${esc(e.state)}</td><td class="r num">${px(c, e.px)}</td><td class="r num">${p ? px(c, p.entry) : "–"}</td><td class="r num">${p ? px(c, p.stop) : "–"}</td><td class="r num">${p ? px(c, p.t2) : "–"}</td><td class="r num">${p ? px(c, p.t46) : "–"}</td><td style="white-space:normal;min-width:260px" class="mut">${esc(e.detail)}</td></tr>`; }).join("")}</tbody></table></div>` : `<div class="empty">No signals yet. They appear here when a 5-minute candle closes with a setup.</div>`}</div>`;
+    ${L.length ? `<div class="tw"><table><thead><tr><th>Time (IST)</th><th>Coin</th><th>Type</th><th>State</th><th class="r">Price</th><th class="r">Entry</th><th class="r">Stop</th><th class="r">1:2</th><th class="r">1:4.6</th><th>Detail</th><th></th></tr></thead><tbody>${L.map(e => { const c = S.coins.get(e.sym); const p = e.plan; return `<tr class="click" data-open="${e.sym}"><td class="num">${dmh(e.t)}</td><td><b>${baseOf(e.sym)}</b></td><td><span class="pill ${e.level === "alert" ? "acc" : e.level === "zone" ? "warn" : ""}">${e.level}</span></td><td>${esc(e.state)}</td><td class="r num">${px(c, e.px)}</td><td class="r num">${p ? px(c, p.entry) : "–"}</td><td class="r num">${p ? px(c, p.stop) : "–"}</td><td class="r num">${p ? px(c, p.t2) : "–"}</td><td class="r num">${p ? px(c, p.t46) : "–"}</td><td style="white-space:normal;min-width:260px" class="mut">${esc(e.detail)}</td><td><button class="tmbtn" data-tm="${e.sym}" data-side="${/bullish|long/i.test(e.state + " " + e.detail) ? "bull" : "bear"}" title="Time Machine: replay this setup">⏱</button></td></tr>`; }).join("")}</tbody></table></div>` : `<div class="empty">No signals yet. They appear here when a 5-minute candle closes with a setup.</div>`}</div>`;
   },
   liq() {
     const t = Date.now() - 3600000; let L = 0, Sh = 0; for (const x of S.liq) if (x.t > t) { if (x.side === "Long") L += x.usd; else Sh += x.usd; }
@@ -878,8 +899,8 @@ function renderAbout() {
 /* ---------------- UI wiring ---------------- */
 function setTab(t) {
   S.tab = t; for (const b of document.querySelectorAll("nav.tabs button")) b.classList.toggle("on", b.dataset.tab === t);
-  for (const v of ["scanner", "signals", "liq", "bt", "about"]) $("#v-" + v).style.display = v === t ? "" : "none";
-  if (t === "scanner") render.scanner(); if (t === "signals") render.signals(); if (t === "liq") render.liq(); if (t === "bt") renderBacktest(); if (t === "about") renderAbout();
+  for (const v of ["scanner", "signals", "tm", "risk", "liq", "bt", "about"]) $("#v-" + v).style.display = v === t ? "" : "none";
+  if (t === "scanner") render.scanner(); if (t === "signals") render.signals(); if (t === "liq") render.liq(); if (t === "bt") renderBacktest(); if (t === "about") renderAbout(); if (t === "tm") renderTM(); if (t === "risk") renderRisk();
 }
 function wire() {
   document.addEventListener("click", e => {
@@ -940,6 +961,368 @@ async function boot() {
   setInterval(() => { const d0 = Math.floor(Date.now() / DAY) * DAY; for (const c of S.coins.values()) if (c.pivDay && c.pivDay !== d0) { c.pivDay = d0; loadCandles(c).catch(() => { }); } }, 60000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { if (!spotWS.ws || spotWS.ws.readyState > 1) spotWS.restart(); if (!futWS.ws || futWS.ws.readyState > 1) futWS.restart(); } });
 }
+/* boot() is called at the end of app5.js */
+
+/* ---------------- Time Machine replay + Risk & budget check ---------------- */
+const TFMS = { "5m": 300000, "15m": 900000, "1h": 3600000, "4h": 14400000 };
+const TF_N = { "5m": 288, "15m": 96, "1h": 48, "4h": 42 };
+const RISK_DEF = { acct: 200, riskPct: 1, maxPosPct: 25, maxOpen: 3, dailyLossPct: 3, fee: 0.075, slip: 0.02, minRR: 1.5, maxFeeShare: 25, tgt: 2, openNow: 0, todayPnl: 0, pnlDay: "" };
+const RK = Object.assign({}, RISK_DEF, LS.get("risk", {}));
+const istDay = () => new Date(Date.now() + IST).toISOString().slice(0, 10);
+if (RK.pnlDay !== istDay()) { RK.todayPnl = 0; RK.pnlDay = istDay(); }
+const saveRisk = () => LS.set("risk", RK);
+const fR = (x, d = 2) => x === null || x === undefined || !isFinite(x) ? "–" : `${x > 0 ? "+" : ""}${x.toFixed(d)}R`;
+const money = (v, d = 2) => v === null || v === undefined || !isFinite(v) ? "–" : `${v < 0 ? "-" : ""}$${Math.abs(v).toFixed(d)}`;
+const pctl = (sorted, p) => { if (!sorted.length) return NaN; const i = (sorted.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo); };
+
+/* ---------- BTC trend filter (research: BTC daily close vs 50-day SMA) ---------- */
+const TREND = { on: null, close: null, sma: null, day: null, hist: new Map() };
+async function loadTrend() {
+  try {
+    const d = (await spot("/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000")).map(parseK).filter(k => k[0] + DAY <= Date.now());
+    const hist = new Map(); let sum = 0;
+    for (let i = 0; i < d.length; i++) { sum += d[i][4]; if (i >= 50) sum -= d[i - 50][4]; if (i >= 49) hist.set(d[i][0] + DAY, { on: d[i][4] > sum / 50, close: d[i][4], sma: sum / 50 }); }
+    const L = hist.get(d[d.length - 1][0] + DAY);
+    Object.assign(TREND, { on: L.on, close: L.close, sma: L.sma, day: d[d.length - 1][0], hist });
+  } catch (e) { console.warn("BTC trend unavailable", e.message); }
+  renderTrend();
+}
+const trendAt = t => { const x = TREND.hist.get(Math.floor(t / DAY) * DAY); return x ? x.on : null; };
+const againstTrend = side => TREND.on === null ? false : (side === "bull" ? !TREND.on : TREND.on);
+function trendTag(side, small) {
+  if (TREND.on === null || !side) return "";
+  return againstTrend(side) ? `<span class="pill warn" title="BTC daily close is ${TREND.on ? "above" : "below"} its 50-day average, so this ${side === "bull" ? "long" : "short"} goes against the BTC trend filter">${small ? "⚠ vs BTC" : "⚠ Against BTC trend"}</span>` : (small ? "" : `<span class="pill bull" title="With the BTC trend filter">✓ With BTC trend</span>`);
+}
+function renderTrend() {
+  const el = $("#btctrend"); if (!el) return;
+  if (TREND.on === null) { el.innerHTML = `<span class="mut">BTC trend</span> <b>–</b>`; return; }
+  const gap = (TREND.close / TREND.sma - 1) * 100;
+  el.className = "tick trend " + (TREND.on ? "on" : "off");
+  el.title = `BTC daily close ${px(null, TREND.close)} vs 50-day SMA ${px(null, TREND.sma)} (${pct(gap)}), last daily close at ${dmh(TREND.day + DAY)} IST. From the strategy research: hold BTC only while this is ON. Updates after 5:30 AM IST.`;
+  el.innerHTML = `<span class="mut">BTC trend</span> <b class="${TREND.on ? "up" : "dn"}">${TREND.on ? "ON" : "OFF"}</b> <span class="num dim">${pct(gap, 1)} vs 50d</span>`;
+}
+
+/* ---------- exchange filters ---------- */
+const XI = new Map();
+function parseFilters(s) {
+  const f = t => (s.filters || []).find(x => x.filterType === t) || {};
+  const lot = f("LOT_SIZE"), mn = f("MIN_NOTIONAL"), nt = f("NOTIONAL");
+  return { step: +lot.stepSize || 0, minQty: +lot.minQty || 0, maxQty: +lot.maxQty || Infinity, minNotional: Math.max(+(nt.minNotional || 0), +(mn.minNotional || 0)), maxNotional: +nt.maxNotional || Infinity };
+}
+async function exInfo(syms) {
+  const need = syms.filter(s => !XI.has(s)); 
+  for (let i = 0; i < need.length; i += 60) {
+    const part = need.slice(i, i + 60);
+    try { const j = await spot(`/api/v3/exchangeInfo?symbols=${encodeURIComponent(JSON.stringify(part))}`); for (const s of j.symbols) XI.set(s.symbol, parseFilters(s)); }
+    catch (e) { for (const s of part) { try { const j = await spot(`/api/v3/exchangeInfo?symbol=${s}`); XI.set(s, parseFilters(j.symbols[0])); } catch { } } }
+  }
+  return syms.map(s => XI.get(s));
+}
+function floorStep(q, step) { if (!step) return q; const d = Math.max(0, Math.round(-Math.log10(step))); return +(Math.floor(q / step + 1e-9) * step).toFixed(d); }
+
+/* ---------- Risk & budget check ---------- */
+function riskCheck(side, entry, stop, target, info) {
+  const fee = RK.fee / 100, slip = RK.slip / 100, A = +RK.acct, riskUsd = A * RK.riskPct / 100, dist = Math.abs(entry - stop);
+  const out = { riskUsd, dist, reasons: [], notes: [] };
+  if (!(dist > 0) || !(entry > 0)) { out.verdict = "Blocked"; out.reasons.push("Entry and stop are the same price."); return out; }
+  let qty = riskUsd / dist, capped = false; const maxNot = A * RK.maxPosPct / 100;
+  if (qty * entry > maxNot) { qty = maxNot / entry; capped = true; }
+  const qtyR = info ? floorStep(qty, info.step) : qty;
+  const notional = qtyR * entry, actRisk = qtyR * dist;
+  const feesStop = qtyR * (entry + stop) * (fee + slip), feesTgt = qtyR * (entry + target) * (fee + slip), reward = qtyR * Math.abs(target - entry);
+  Object.assign(out, { qty: qtyR, qtyRaw: qty, capped, notional, actRisk, feesStop, feesTgt, reward, lossAtStop: actRisk + feesStop, gainAtTgt: reward - feesTgt,
+    feeR: actRisk ? feesStop / actRisk : NaN, rrGross: Math.abs(target - entry) / dist, rrNet: (actRisk + feesStop) ? (reward - feesTgt) / (actRisk + feesStop) : NaN, feeShare: reward ? feesTgt / reward * 100 : NaN, stopPct: dist / entry * 100, posPct: notional / A * 100 });
+  const dl = A * RK.dailyLossPct / 100, lossToday = Math.max(0, -RK.todayPnl);
+  if (side === "bear") out.reasons.push("Spot can't short. Read this as \"don't buy\", or it needs futures (not covered here).");
+  if (+RK.openNow >= +RK.maxOpen) out.reasons.push(`You already have ${RK.openNow} open trade${RK.openNow == 1 ? "" : "s"} (max ${RK.maxOpen}).`);
+  if (lossToday >= dl) out.reasons.push(`Today's loss limit is used up (${money(-lossToday)} of ${money(-dl)}).`);
+  else if (lossToday + out.lossAtStop > dl) out.reasons.push(`A stop-out (${money(-out.lossAtStop)}) would break today's ${RK.dailyLossPct}% loss limit (${money(dl - lossToday)} left).`);
+  if (out.feeShare > RK.maxFeeShare) out.reasons.push(`Fees and slippage eat ${out.feeShare.toFixed(0)}% of the target profit (limit ${RK.maxFeeShare}%).`);
+  if (out.rrNet < RK.minRR) out.reasons.push(`Reward:risk after fees is 1:${out.rrNet.toFixed(2)}, below your minimum 1:${RK.minRR}.`);
+  const small = info && (qtyR < info.minQty || notional < info.minNotional || qtyR <= 0);
+  if (capped) out.notes.push(`Position capped at ${RK.maxPosPct}% of the account (${money(maxNot)}), so you'd risk ${money(actRisk)} instead of ${money(riskUsd)}.`);
+  if (info) out.notes.push(`Binance filters: lot step ${info.step}, min qty ${info.minQty}, min order ${money(info.minNotional)}.`); else out.notes.push("Exchange filters not loaded yet; quantity is unrounded.");
+  out.verdict = out.reasons.length ? "Blocked" : small ? "Too small" : "OK";
+  if (small && !out.reasons.length) out.reasons.push(`Order of ${money(notional)} is below Binance's minimum ${money(info.minNotional)}${capped ? "" : `; a wider stop or a bigger risk % would be needed`}.`);
+  return out;
+}
+const verdictTone = v => v === "OK" ? "bull" : v === "Too small" ? "warn" : "bear";
+function riskHTML(c, side, p, target, rc, compact) {
+  const q = rc.qty !== undefined ? `${+rc.qty.toPrecision(8)} ${c ? c.base : ""}` : "–";
+  return `<div class="verdict ${verdictTone(rc.verdict)}"><b>${rc.verdict === "OK" ? "✓ OK" : rc.verdict === "Too small" ? "▽ Too small" : "⛔ Blocked"}</b><span>${rc.verdict === "OK" ? "Fits your rules." : esc(rc.reasons[0] || "")}</span></div>
+  <div class="plan">
+    <span>Risk budget (${RK.riskPct}% of ${money(+RK.acct, 0)})</span><b class="num">${money(rc.riskUsd)}</b>
+    <span>Entry → stop</span><b class="num">${px(c, p.entry)} → <span class="dn">${px(c, p.stop)}</span> <span class="mut">(${rc.stopPct ? rc.stopPct.toFixed(2) : "–"}%)</span></b>
+    <span>Target (${(+RK.tgt).toFixed(1)}R)</span><b class="num up">${px(c, target)}</b>
+    <span>Quantity</span><b class="num">${q}</b>
+    <span>Position size</span><b class="num">${money(rc.notional)} <span class="mut">(${rc.posPct ? rc.posPct.toFixed(0) : "–"}% of account)</span></b>
+    <span>Loss if stopped, incl. fees</span><b class="num dn">${money(-rc.lossAtStop)}</b>
+    <span>Gain at target, after fees</span><b class="num up">${money(rc.gainAtTgt)}</b>
+    <span>Fees + slippage, round trip</span><b class="num ${rc.feeR > 0.3 ? "dn" : ""}">${money(rc.feesStop, 3)} · ${isFinite(rc.feeR) ? rc.feeR.toFixed(2) : "–"}R</b>
+    <span>Reward:risk before → after fees</span><b class="num ${rc.rrNet < RK.minRR ? "dn" : "up"}">1:${isFinite(rc.rrGross) ? rc.rrGross.toFixed(2) : "–"} → 1:${isFinite(rc.rrNet) ? rc.rrNet.toFixed(2) : "–"}</b>
+  </div>
+  ${rc.reasons.length > 1 ? `<ul class="reasons">${rc.reasons.slice(1).map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
+  ${compact ? "" : `<p class="note">${rc.notes.map(esc).join(" ")} Fee ${RK.fee}% + slippage ${RK.slip}% per side. Change the rules in the Risk tab.</p>`}`;
+}
+
+/* ---------- Time Machine: history, detection, simulation ---------- */
+const HC = new Map();
+async function fetchHist(sym, tf, n) {
+  const key = `${sym}|${tf}|${n}`, hit = HC.get(key); if (hit && Date.now() - hit.at < 120000) return hit.k;
+  let out = [], end = null;
+  while (out.length < n + 1) {
+    const lim = Math.min(1000, n + 1 - out.length);
+    const k = (await spot(`/api/v3/klines?symbol=${sym}&interval=${tf}&limit=${lim}${end ? `&endTime=${end}` : ""}`)).map(parseK);
+    if (!k.length) break; out = k.concat(out); end = k[0][0] - 1; if (k.length < lim) break;
+  }
+  const ms = TFMS[tf], now = Date.now(); out = out.filter(k => k[0] + ms <= now).slice(-n);
+  HC.set(key, { at: Date.now(), k: out }); return out;
+}
+function simTrade(c, i, dir, entry, stop, tgt, N, cost) {
+  const risk = Math.abs(entry - stop), path = [0];
+  const fin = (why, n, exitPx) => { const g = (exitPx - entry) * dir / risk, fees = (cost.fee + cost.slip) * (entry + exitPx) / risk; path.push(g); return { why, hold: n - i, exitPx, grossR: g, netR: g - fees, feeR: fees, path }; };
+  for (let n = i + 1; n <= Math.min(i + N, c.length - 1); n++) {
+    const [, o, h, l, cl] = c[n];
+    if (dir > 0 ? l <= stop : h >= stop) return fin("stop", n, dir > 0 ? Math.min(stop, o) : Math.max(stop, o));
+    if (dir > 0 ? h >= tgt : l <= tgt) return fin("target", n, tgt);
+    path.push((cl - entry) * dir / risk);
+  }
+  if (i + N > c.length - 1) return null; // future not known yet
+  path.pop(); return fin("time", i + N, c[i + N][4]);
+}
+function runReplay(c, cfg) {
+  const dir = cfg.side === "bull" ? 1 : -1, cost = { fee: cfg.fee / 100, slip: cfg.slip / 100 }, trades = []; let open = 0, skipped = 0, found = 0;
+  if (cfg.mode === "ob") {
+    const a = OB.atr(c), vw = OB.sessionVwap(c), dop = OB.dayOpen(c), obs = OB.findOrderBlocks(c, a);
+    const sigs = OB.entrySignals(c, a, vw, dop, obs).filter(s => s.side === cfg.side); found = sigs.length; let busy = -1;
+    for (const s of sigs) {
+      if (cfg.noOverlap && s.m <= busy) { skipped++; continue; }
+      const tg = s.entry + dir * cfg.rr * s.risk, r = simTrade(c, s.m, dir, s.entry, s.stop, tg, cfg.N, cost);
+      if (!r) { open++; continue; } busy = s.m + r.hold; trades.push({ ...r, t: s.t, entry: s.entry, stop: s.stop, tgt: tg, trend: trendAt(s.t) });
+    }
+  } else {
+    for (let i = 60; i < c.length; i++) {
+      const e = c[i][4], st = e * (1 - dir * cfg.stopPct / 100), tg = e * (1 + dir * cfg.tgtPct / 100); found++;
+      const r = simTrade(c, i, dir, e, st, tg, cfg.N, cost); if (!r) { open++; break; }
+      trades.push({ ...r, t: c[i][0], entry: e, stop: st, tgt: tg, trend: trendAt(c[i][0]) }); i += r.hold - 1;
+    }
+  }
+  let tr = trades; if (cfg.trendF === "on") tr = trades.filter(x => x.trend === true); else if (cfg.trendF === "off") tr = trades.filter(x => x.trend === false);
+  return { trades: tr, all: trades, found, open, skipped };
+}
+function tmStats(tr) {
+  const n = tr.length, R = tr.map(x => x.netR); if (!n) return { n: 0 };
+  const sum = R.reduce((a, b) => a + b, 0), mean = sum / n, sd = n > 1 ? Math.sqrt(R.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1)) : 0;
+  const pos = R.filter(x => x > 0).reduce((a, b) => a + b, 0), neg = -R.filter(x => x < 0).reduce((a, b) => a + b, 0);
+  let eq = 0, pk = 0, dd = 0; for (const r of R) { eq += r; pk = Math.max(pk, eq); dd = Math.min(dd, eq - pk); }
+  return { n, tgt: tr.filter(x => x.why === "target").length, stop: tr.filter(x => x.why === "stop").length, time: tr.filter(x => x.why === "time").length,
+    winNet: R.filter(x => x > 0).length / n * 100, mean, gross: tr.reduce((a, x) => a + x.grossR, 0) / n, sd, ci: 1.96 * sd / Math.sqrt(n), pf: neg ? pos / neg : null,
+    total: sum, dd, hold: tr.reduce((a, x) => a + x.hold, 0) / n, feeR: tr.reduce((a, x) => a + x.feeR, 0) / n };
+}
+function monteCarlo(R, nT, sims, riskFrac, acct) {
+  const n = R.length, block = n >= 12 ? 3 : 1, paths = [], finals = new Float64Array(sims); let dd20 = 0, loss = 0;
+  for (let s = 0; s < sims; s++) {
+    const p = new Float64Array(nT + 1); let eq = acct, pk = acct, hit = false; p[0] = acct; let t = 0;
+    while (t < nT) { const st = Math.floor(Math.random() * n); for (let b = 0; b < block && t < nT; b++) { eq *= Math.max(0, 1 + riskFrac * R[(st + b) % n]); p[++t] = eq; if (eq > pk) pk = eq; if (eq <= pk * 0.8) hit = true; } }
+    finals[s] = eq; if (hit) dd20++; if (eq < acct) loss++; if (s < 1500) paths.push(p);
+  }
+  const bands = []; for (let t = 0; t <= nT; t++) { const col = paths.map(p => p[t]).sort((a, b) => a - b); bands.push([0.05, 0.25, 0.5, 0.75, 0.95].map(q => pctl(col, q))); }
+  const f = Array.from(finals).sort((a, b) => a - b);
+  return { nT, sims, block, p5: pctl(f, 0.05), p50: pctl(f, 0.5), p95: pctl(f, 0.95), dd20: dd20 / sims * 100, loss: loss / sims * 100, bands };
+}
+
+/* ---------- SVG charts ---------- */
+function fanSVG(tr, rr, N) {
+  const W = 640, H = 260, L = 38, B = 22, T = 10, Rr = 10; if (!tr.length) return "";
+  const maxH = Math.min(N, Math.max(...tr.map(x => x.hold)));
+  let lo = -1.3, hi = rr + 0.4; for (const x of tr) for (const v of x.path) { if (v < lo) lo = Math.max(v, -3); if (v > hi) hi = Math.min(v, rr + 3); }
+  const X = i => L + i / Math.max(1, maxH) * (W - L - Rr), Y = v => T + (hi - Math.max(lo, Math.min(hi, v))) / (hi - lo) * (H - T - B);
+  const col = { target: "var(--bull)", stop: "var(--bear)", time: "var(--mut)" };
+  const show = tr.slice(-400);
+  const lines = show.map(x => `<polyline points="${x.path.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" style="stroke:${col[x.why]};stroke-opacity:${show.length > 150 ? .18 : .35};fill:none;stroke-width:1.2"/>`).join("");
+  const med = []; for (let i = 0; i <= maxH; i++) { const v = tr.map(x => x.path[Math.min(i, x.path.length - 1)]).sort((a, b) => a - b); med.push(`${X(i).toFixed(1)},${Y(pctl(v, 0.5)).toFixed(1)}`); }
+  const gl = [[0, "0R"], [-1, "-1R stop"], [rr, `+${rr}R target`]].map(([v, t]) => `<line x1="${L}" x2="${W - Rr}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:${v > 0 ? "var(--bull)" : v < 0 ? "var(--bear)" : "var(--dim)"};stroke-dasharray:4 4;stroke-width:1"/><text x="${L - 4}" y="${Y(v) + 4}" text-anchor="end" class="ax">${v > 0 ? "+" : ""}${v}R</text>`).join("");
+  const xt = [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(f * maxH)).map(i => `<text x="${X(i)}" y="${H - 6}" text-anchor="middle" class="ax">${i}</text>`).join("");
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${gl}${lines}<polyline points="${med.join(" ")}" style="stroke:var(--acc);stroke-width:2.5;fill:none"/>${xt}</svg>`;
+}
+function histSVG(R) {
+  const W = 640, H = 200, L = 30, B = 22, T = 8; if (!R.length) return "";
+  const lo = Math.floor(Math.min(-1.5, ...R) * 4) / 4, hi = Math.ceil(Math.max(0.5, ...R) * 4) / 4, w = 0.25, nb = Math.max(1, Math.round((hi - lo) / w));
+  const bins = new Array(nb).fill(0); for (const r of R) bins[Math.min(nb - 1, Math.max(0, Math.floor((r - lo) / w)))]++;
+  const mx = Math.max(...bins), bw = (W - L - 10) / nb;
+  const bars = bins.map((v, i) => { const x0 = lo + i * w, h = v / mx * (H - T - B); return v ? `<rect x="${(L + i * bw + 1).toFixed(1)}" y="${(H - B - h).toFixed(1)}" width="${Math.max(1, bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="2" style="fill:${x0 + w / 2 >= 0 ? "var(--bull)" : "var(--bear)"};opacity:.8"><title>${x0.toFixed(2)}R to ${(x0 + w).toFixed(2)}R: ${v} trades</title></rect>` : ""; }).join("");
+  const ticks = []; for (let v = Math.ceil(lo); v <= hi; v++) ticks.push(`<text x="${(L + (v - lo) / w * bw).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="ax">${v > 0 ? "+" : ""}${v}R</text>`);
+  const zx = L + (0 - lo) / w * bw;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${bars}<line x1="${zx}" x2="${zx}" y1="${T}" y2="${H - B}" style="stroke:var(--dim);stroke-dasharray:3 3"/>${ticks.join("")}<text x="${L}" y="${T + 10}" class="ax">${mx} max</text></svg>`;
+}
+function mcSVG(mc, acct) {
+  const W = 640, H = 220, L = 46, B = 22, T = 10, Rr = 10, b = mc.bands;
+  let lo = Math.min(acct * 0.78, ...b.map(x => x[0])), hi = Math.max(acct * 1.05, ...b.map(x => x[4]));
+  const X = i => L + i / mc.nT * (W - L - Rr), Y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const area = (a, z) => `M${b.map((x, i) => `${X(i).toFixed(1)},${Y(x[a]).toFixed(1)}`).join("L")}L${b.map((x, i) => [i, x]).reverse().map(([i, x]) => `${X(i).toFixed(1)},${Y(x[z]).toFixed(1)}`).join("L")}Z`;
+  const yt = [lo, acct, hi].map(v => `<text x="${L - 4}" y="${Y(v) + 4}" text-anchor="end" class="ax">$${v.toFixed(0)}</text>`).join("");
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}"><path d="${area(0, 4)}" style="fill:var(--acc);opacity:.15"/><path d="${area(1, 3)}" style="fill:var(--acc);opacity:.28"/>
+   <polyline points="${b.map((x, i) => `${X(i).toFixed(1)},${Y(x[2]).toFixed(1)}`).join(" ")}" style="stroke:var(--acc);stroke-width:2.5;fill:none"/>
+   <line x1="${L}" x2="${W - Rr}" y1="${Y(acct)}" y2="${Y(acct)}" style="stroke:var(--dim);stroke-dasharray:4 4"/><line x1="${L}" x2="${W - Rr}" y1="${Y(acct * 0.8)}" y2="${Y(acct * 0.8)}" style="stroke:var(--bear);stroke-dasharray:4 4"/><text x="${W - Rr}" y="${Y(acct * 0.8) - 4}" text-anchor="end" class="ax" style="fill:var(--bear)">-20%</text>
+   ${yt}<text x="${L}" y="${H - 6}" class="ax">trade 0</text><text x="${W - Rr}" y="${H - 6}" text-anchor="end" class="ax">trade ${mc.nT}</text></svg>`;
+}
+
+/* ---------- Time Machine tab ---------- */
+const TM = { f: Object.assign({ sym: "BTCUSDT", tf: "5m", side: "bull", mode: "ob", rr: 2, n: 5000, N: 288, stopPct: 0.5, tgtPct: 1, noOverlap: true, trendF: "all", entry: "", stop: "", target: "" }, LS.get("tm", {})), res: null, busy: false, from: null };
+function tmForm() {
+  const f = TM.f, opts = [...new Set([...S.uni, f.sym])];
+  return `<div class="card"><h3>⏱ Time Machine <span class="r mut">replays this setup on the coin's own past candles</span></h3>
+  <div class="form">
+    <label>Coin<input id="tm-sym" list="tm-list" value="${esc(baseOf(f.sym))}" autocomplete="off"><datalist id="tm-list">${opts.map(s => `<option value="${baseOf(s)}">`).join("")}</datalist></label>
+    <label>Timeframe<select id="tm-tf">${Object.keys(TFMS).map(t => `<option ${t === f.tf ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+    <label>Side<select id="tm-side"><option value="bull" ${f.side === "bull" ? "selected" : ""}>Long (bullish)</option><option value="bear" ${f.side === "bear" ? "selected" : ""}>Short (bearish)</option></select></label>
+    <label>Setup<select id="tm-mode"><option value="ob" ${f.mode === "ob" ? "selected" : ""}>Order-block signal (dashboard rules)</option><option value="fixed" ${f.mode === "fixed" ? "selected" : ""}>Same % stop/target, any candle (baseline)</option></select></label>
+    <label>History<select id="tm-n">${[1000, 1500, 3000, 5000, 10000].map(n => `<option ${n == f.n ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+    <label title="Close the trade at market if neither stop nor target is hit within N candles">Max candles (N)<input id="tm-N" type="number" min="5" max="2000" value="${f.N}"></label>
+    <label class="ob-only">Target (R)<input id="tm-rr" type="number" step="0.1" min="0.5" value="${f.rr}"></label>
+    <label class="fx-only">Stop %<input id="tm-sp" type="number" step="0.05" min="0.05" value="${f.stopPct}"></label>
+    <label class="fx-only">Target %<input id="tm-tp" type="number" step="0.05" min="0.05" value="${f.tgtPct}"></label>
+    <label>BTC trend filter<select id="tm-tr"><option value="all" ${f.trendF === "all" ? "selected" : ""}>All trades</option><option value="on" ${f.trendF === "on" ? "selected" : ""}>Only when BTC trend ON</option><option value="off" ${f.trendF === "off" ? "selected" : ""}>Only when OFF</option></select></label>
+    <label class="chk"><input type="checkbox" id="tm-ov" ${f.noOverlap ? "checked" : ""}> One trade at a time</label>
+  </div>
+  <details class="manual" ${f.entry ? "open" : ""}><summary>Manual levels (optional): entry, stop, target</summary>
+    <div class="form"><label>Entry<input id="tm-e" type="number" step="any" value="${f.entry}"></label><label>Stop<input id="tm-s" type="number" step="any" value="${f.stop}"></label><label>Target<input id="tm-t" type="number" step="any" value="${f.target}"></label>
+    <div class="note" style="align-self:end">Sets the side, target R (order-block mode) and stop/target % (baseline mode) from your prices, and adds a risk check.</div></div></details>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="tm-run">${TM.busy ? "Running…" : "▶ Run replay"}</button><span class="note">Costs: fee ${RK.fee}% + slippage ${RK.slip}% per side (from the Risk tab). Monte Carlo risks ${RK.riskPct}% of ${money(+RK.acct, 0)} per trade.</span></div></div>`;
+}
+function readTM() {
+  const v = id => $("#" + id) ? $("#" + id).value : null, f = TM.f;
+  let b = (v("tm-sym") || "BTC").trim().toUpperCase().replace(/\/?USDT$/, ""); f.sym = b + "USDT";
+  f.tf = v("tm-tf"); f.side = v("tm-side"); f.mode = v("tm-mode"); f.n = +v("tm-n"); f.N = Math.max(5, +v("tm-N") || TF_N[f.tf]); f.rr = Math.max(0.3, +v("tm-rr") || 2);
+  f.stopPct = Math.max(0.02, +v("tm-sp") || 0.5); f.tgtPct = Math.max(0.02, +v("tm-tp") || 1); f.trendF = v("tm-tr"); f.noOverlap = $("#tm-ov").checked;
+  f.entry = v("tm-e"); f.stop = v("tm-s"); f.target = v("tm-t");
+  const e = +f.entry, s = +f.stop, t = +f.target;
+  if (e > 0 && s > 0 && t > 0 && (t - e) * (e - s) > 0) { f.side = t > e ? "bull" : "bear"; f.rr = +(Math.abs(t - e) / Math.abs(e - s)).toFixed(2); f.stopPct = +(Math.abs(e - s) / e * 100).toFixed(3); f.tgtPct = +(Math.abs(t - e) / e * 100).toFixed(3); }
+  LS.set("tm", f);
+}
+function renderTM() {
+  const el = $("#v-tm"); if (!el) return;
+  el.innerHTML = tmForm() + `<div id="tm-out">${TM.res ? tmResultHTML() : `<div class="card" style="margin-top:14px"><div class="empty">Pick a coin and press Run, or press <b>⏱</b> on any signal in the Scanner or Signals tabs.</div></div>`}</div>`;
+  syncTMMode();
+}
+function syncTMMode() { const m = $("#tm-mode") && $("#tm-mode").value; for (const x of document.querySelectorAll("#v-tm .ob-only")) x.style.display = m === "ob" ? "" : "none"; for (const x of document.querySelectorAll("#v-tm .fx-only")) x.style.display = m === "fixed" ? "" : "none"; }
+async function runTM() {
+  if (TM.busy) return; readTM(); const f = { ...TM.f }; TM.busy = true; renderTM();
+  $("#tm-out").innerHTML = `<div class="card" style="margin-top:14px"><div class="loading"><div class="spin"></div>Downloading ${f.n} ${f.tf} candles for ${baseOf(f.sym)} from Binance…</div></div>`;
+  try {
+    if (!TREND.hist.size) await loadTrend();
+    const [k, [info]] = await Promise.all([fetchHist(f.sym, f.tf, f.n), exInfo([f.sym]).catch(() => [null])]);
+    if (k.length < 120) throw new Error(`only ${k.length} candles available`);
+    const rp = runReplay(k, { ...f, fee: RK.fee, slip: RK.slip }), st = tmStats(rp.trades);
+    const R = rp.trades.map(x => x.netR), rf = RK.riskPct / 100;
+    const mc = st.n >= 5 ? [monteCarlo(R, 20, 3000, rf, +RK.acct), monteCarlo(R, 50, 3000, rf, +RK.acct)] : null;
+    const byT = { on: tmStats(rp.all.filter(x => x.trend === true)), off: tmStats(rp.all.filter(x => x.trend === false)) };
+    let plan = null; const e = +f.entry, s = +f.stop, t = +f.target;
+    if (e > 0 && s > 0 && t > 0) plan = { entry: e, stop: s, target: t, src: TM.from || "manual" };
+    TM.res = { f, k: { n: k.length, from: k[0][0], to: k[k.length - 1][0] }, rp, st, mc, byT, plan, info, at: Date.now(), coin: S.coins.get(f.sym) || { base: baseOf(f.sym), sym: f.sym, dec: undefined } };
+    window.TM_LAST = { sym: f.sym, tf: f.tf, side: f.side, mode: f.mode, rr: f.rr, candles: k.length, stats: st, mc20: mc && { p5: mc[0].p5, p50: mc[0].p50, p95: mc[0].p95, dd20: mc[0].dd20 }, mc50: mc && { p5: mc[1].p5, p50: mc[1].p50, p95: mc[1].p95, dd20: mc[1].dd20 } };
+  } catch (err) { TM.res = null; TM.busy = false; renderTM(); $("#tm-out").innerHTML = `<div class="card" style="margin-top:14px"><div class="empty">Replay failed: ${esc(err.message || err)}. Check the coin name (it must be a Binance USDT spot pair).</div></div>`; return; }
+  TM.busy = false; renderTM();
+  const o = $("#tm-out"); if (o) o.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function tmResultHTML() {
+  const r = TM.res, f = r.f, st = r.st, c = r.coin, rr = f.mode === "ob" ? f.rr : +(f.tgtPct / f.stopPct).toFixed(2);
+  const setup = f.mode === "ob" ? `${f.side === "bull" ? "long" : "short"} order-block signal, target ${f.rr}R` : `${f.side === "bull" ? "long" : "short"} from any candle, stop ${f.stopPct}% / target ${f.tgtPct}%`;
+  const span = `${dmh(r.k.from)} → ${dmh(r.k.to)} IST`;
+  if (!st.n) return `<div class="card" style="margin-top:14px"><h3>${baseOf(f.sym)} · ${f.tf} · ${setup}</h3><div class="callout w"><b>No past occurrences.</b> The ${r.k.n} candles (${span}) had ${r.rp.found} matching setups${r.rp.open ? `, ${r.rp.open} still open` : ""}${f.trendF !== "all" ? " after the BTC trend filter" : ""}. Try a longer history or a higher timeframe.</div></div>`;
+  const small = st.n < 30, neg = st.mean < 0;
+  const head = small ? `<div class="callout w"><b>Small sample: ${st.n} trades.</b> Fewer than 30 past cases, so these numbers are unreliable and can change a lot with a few more trades. Treat them as a rough hint only.</div>` : "";
+  const verdict = `<div class="callout ${neg ? "" : "g"}"><b>${neg ? `Negative expectancy: ${fR(st.mean)} per trade after costs.` : `Positive after costs: ${fR(st.mean)} per trade.`}</b> Over ${span}, this setup came up ${st.n} times on ${baseOf(f.sym)}. It hit the target first ${st.tgt}× and the stop first ${st.stop}×, and ${st.time}× it hit neither within ${f.N} candles. 95% range of the average: ${fR(st.mean - st.ci)} to ${fR(st.mean + st.ci)}${st.mean - st.ci < 0 && st.mean + st.ci > 0 ? ", which includes zero, so there is no proven edge" : ""}. Past results don't guarantee future ones.</div>`;
+  const kv = `<div class="kv">
+    <div><span>Sample size</span><b class="${small ? "warn-t" : ""}">${st.n}${small ? " ⚠" : ""}</b></div>
+    <div><span>Target first / stop first / neither</span><b>${st.tgt} / ${st.stop} / ${st.time}</b></div>
+    <div><span>Hit target first</span><b>${(st.tgt / st.n * 100).toFixed(1)}%</b></div>
+    <div><span>Win rate (net R > 0)</span><b>${st.winNet.toFixed(1)}%</b></div>
+    <div><span>Expectancy after costs</span><b class="${cls(st.mean)}">${fR(st.mean)}</b></div>
+    <div><span>Before costs</span><b class="${cls(st.gross)}">${fR(st.gross)}</b></div>
+    <div><span>Avg cost per trade</span><b class="dn">${fR(-st.feeR)}</b></div>
+    <div><span>Total</span><b class="${cls(st.total)}">${fR(st.total, 1)}</b></div>
+    <div><span>Profit factor</span><b>${st.pf === null ? "–" : st.pf.toFixed(2)}</b></div>
+    <div><span>Worst run (drawdown)</span><b class="dn">${fR(st.dd, 1)}</b></div>
+    <div><span>Avg hold</span><b>${st.hold.toFixed(0)} × ${f.tf}</b></div>
+    <div><span>Same setup at ${RK.riskPct}% risk</span><b class="${cls(st.mean)}">${money(st.mean * RK.acct * RK.riskPct / 100)} / trade</b></div></div>`;
+  const tsplit = (r.byT.on.n || r.byT.off.n) ? `<div class="note" style="margin-top:8px">BTC trend split (all trades): ON ${r.byT.on.n} trades, ${r.byT.on.n ? fR(r.byT.on.mean) : "–"} avg · OFF ${r.byT.off.n} trades, ${r.byT.off.n ? fR(r.byT.off.mean) : "–"} avg.${TREND.on !== null ? ` BTC trend now: <b class="${TREND.on ? "up" : "dn"}">${TREND.on ? "ON" : "OFF"}</b>${againstTrend(f.side) ? " (this side is against it)" : ""}.` : ""}</div>` : "";
+  let riskBox = "";
+  if (r.plan) { const tgt = r.plan.target, rc = riskCheck(f.side, r.plan.entry, r.plan.stop, tgt, r.info); riskBox = `<div class="card"><h3>This trade · risk check <span class="r mut">${r.plan.src === "signal" ? "levels from the live signal" : r.plan.src === "zone" ? "levels if the zone is retested" : "your levels"}</span></h3>${riskHTML(c, f.side, r.plan, tgt, rc)}</div>`; }
+  const mcCard = m => `<div class="card"><h3>Next ${m.nT} trades · Monte Carlo <span class="r mut">${m.sims} block-bootstrap runs</span></h3>
+    <div class="kv"><div><span>Bad case (5th pct)</span><b class="${m.p5 < RK.acct ? "dn" : "up"}">${money(m.p5)}</b></div><div><span>Median</span><b class="${m.p50 < RK.acct ? "dn" : "up"}">${money(m.p50)}</b></div><div><span>Good case (95th pct)</span><b class="${m.p95 < RK.acct ? "dn" : "up"}">${money(m.p95)}</b></div><div><span>Chance of a −20% drawdown</span><b class="${m.dd20 > 10 ? "dn" : ""}">${m.dd20.toFixed(1)}%</b></div><div><span>Chance of ending down</span><b class="${m.loss > 50 ? "dn" : ""}">${m.loss.toFixed(0)}%</b></div></div>
+    ${mcSVG(m, +RK.acct)}<div class="legend"><span><i style="background:var(--acc);opacity:.3"></i>5–95% range</span><span><i style="background:var(--acc);opacity:.55"></i>25–75%</span><span><i style="background:var(--acc);height:3px"></i>median</span><span>Start ${money(+RK.acct, 0)}, risking ${RK.riskPct}% of equity per trade</span></div></div>`;
+  const rows = r.rp.trades.slice(-40).reverse().map(x => `<tr><td class="num">${dmh(x.t)}</td><td class="r num">${px(c, x.entry)}</td><td class="r num dn">${px(c, x.stop)}</td><td class="r num up">${px(c, x.tgt)}</td><td><span class="pill ${x.why === "target" ? "bull" : x.why === "stop" ? "bear" : ""}">${x.why === "time" ? "neither" : x.why}</span></td><td class="r num">${x.hold}</td><td class="r num ${cls(x.netR)}">${fR(x.netR)}</td><td>${x.trend === null ? "–" : x.trend ? '<span class="up">ON</span>' : '<span class="dn">OFF</span>'}</td></tr>`).join("");
+  return `<div class="card" style="margin-top:14px" id="tm-res"><h3>${baseOf(f.sym)} · ${f.tf} · ${setup} <span class="r mut">${r.k.n} candles · ${span}</span></h3>${head}${verdict}${kv}${tsplit}</div>
+  ${riskBox ? `<div class="grid g2" style="margin-top:14px">${riskBox}<div class="card"><h3>How to read this</h3><p class="note" style="font-size:13px">Each past case uses the same detection code as the live dashboard, entered at the confirming candle's close, then walked forward candle by candle. If one candle touches both stop and target, the stop counts. Costs: ${RK.fee}% fee + ${RK.slip}% slippage per side, converted to R. "Neither" trades exit at the close of candle ${f.N}. ${r.rp.open ? `${r.rp.open} recent case(s) are still open and left out. ` : ""}${r.rp.skipped ? `${r.rp.skipped} overlapping case(s) skipped (one trade at a time). ` : ""}</p></div></div>` : ""}
+  <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Every past path <span class="r mut">R vs candles after entry</span></h3>${fanSVG(r.rp.trades, rr, f.N)}<div class="legend"><span><i style="background:var(--bull)"></i>hit target</span><span><i style="background:var(--bear)"></i>hit stop</span><span><i style="background:var(--mut)"></i>neither</span><span><i style="background:var(--acc);height:3px"></i>median path</span><span>x: candles (${f.tf})</span></div></div>
+  <div class="card"><h3>Final R after costs <span class="r mut">distribution</span></h3>${histSVG(r.rp.trades.map(x => x.netR))}<div class="note">Each bar is a 0.25R bucket. The fee drag moves wins below their target and losses beyond −1R.</div></div></div>
+  ${r.mc ? `<div class="grid g2" style="margin-top:14px">${mcCard(r.mc[0])}${mcCard(r.mc[1])}</div><p class="note">Monte Carlo resamples the ${st.n} past results in blocks of ${r.mc[0].block} (to keep losing streaks together), ${r.mc[0].sims} times, and compounds them at ${RK.riskPct}% risk per trade. It assumes the future looks like this sample, which is a big assumption${small ? ", especially with so few trades" : ""}.</p>` : `<p class="note">Monte Carlo needs at least 5 past trades.</p>`}
+  <div class="card" style="margin-top:14px"><h3>Past cases <span class="r mut">latest ${Math.min(40, st.n)} of ${st.n}</span></h3><div class="tw"><table><thead><tr><th>Time (IST)</th><th class="r">Entry</th><th class="r">Stop</th><th class="r">Target</th><th>Outcome</th><th class="r">Candles</th><th class="r">Net R</th><th>BTC trend</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function openTM(sym, side) {
+  const c = S.coins.get(sym), f = TM.f; f.sym = sym; f.mode = "ob"; f.tf = "5m"; f.N = TF_N["5m"]; f.trendF = "all"; f.rr = +RK.tgt || 2; f.n = 5000;
+  const ev = c && c.ev; f.side = side || (ev ? ev.want : (c && c.bias) || "bull");
+  const p = ev && ev.want === f.side ? ev.plan : null;
+  if (p) { f.entry = +p.entry.toPrecision(8); f.stop = +p.stop.toPrecision(8); f.target = +(f.side === "bull" ? p.entry + f.rr * p.risk : p.entry - f.rr * p.risk).toPrecision(8); TM.from = p.src; } else { f.entry = f.stop = f.target = ""; TM.from = null; }
+  if (S.sel) detail.close(); setTab("tm"); window.scrollTo(0, 0); runTM();
+}
+
+/* ---------- Risk tab ---------- */
+function riskForm() {
+  const n = (id, l, v, step, hint) => `<label title="${hint || ""}">${l}<input id="rk-${id}" data-rk="${id}" type="number" step="${step}" value="${v}"></label>`;
+  return `<div class="card"><h3>Risk & budget rules <span class="r mut">saved in this browser</span></h3>
+  <div class="form">${n("acct", "Account size ($)", RK.acct, 1)}${n("riskPct", "Risk per trade (%)", RK.riskPct, 0.1)}${n("maxPosPct", "Max position (% of account)", RK.maxPosPct, 1)}${n("maxOpen", "Max open trades", RK.maxOpen, 1)}${n("dailyLossPct", "Daily loss limit (%)", RK.dailyLossPct, 0.5)}
+  <label>Fee per side<select id="rk-fee" data-rk="fee"><option value="0.075" ${RK.fee == 0.075 ? "selected" : ""}>0.075% (paying with BNB)</option><option value="0.1" ${RK.fee == 0.1 ? "selected" : ""}>0.1% (standard)</option></select></label>
+  ${n("slip", "Slippage per side (%)", RK.slip, 0.01)}${n("minRR", "Min reward:risk after fees", RK.minRR, 0.1)}${n("maxFeeShare", "Block if fees eat more than (% of target)", RK.maxFeeShare, 1)}
+  <label>Target used<select id="rk-tgt" data-rk="tgt"><option value="2" ${RK.tgt == 2 ? "selected" : ""}>2R</option><option value="3" ${RK.tgt == 3 ? "selected" : ""}>3R</option><option value="4.6" ${RK.tgt == 4.6 ? "selected" : ""}>4.6R (reel)</option></select></label>
+  ${n("openNow", "Trades open right now", RK.openNow, 1, "You enter this; the page can't see your account")}${n("todayPnl", "Today's realised P/L ($)", RK.todayPnl, 0.01, "Negative for a loss. Resets each IST day")}</div>
+  <div class="kv"><div><span>Risk per trade</span><b>${money(RK.acct * RK.riskPct / 100)}</b></div><div><span>Max position</span><b>${money(RK.acct * RK.maxPosPct / 100)}</b></div><div><span>Daily loss limit</span><b>${money(RK.acct * RK.dailyLossPct / 100)}</b></div><div><span>Left today</span><b class="${RK.acct * RK.dailyLossPct / 100 + Math.min(0, RK.todayPnl) <= 0 ? "dn" : ""}">${money(Math.max(0, RK.acct * RK.dailyLossPct / 100 + Math.min(0, RK.todayPnl)))}</b></div><div><span>BTC trend filter</span><b class="${TREND.on ? "up" : TREND.on === false ? "dn" : ""}">${TREND.on === null ? "–" : TREND.on ? "ON" : "OFF"}</b></div></div>
+  <p class="note">The page never sees your Binance account, so open trades and today's P/L are what you type here. Position size = risk budget ÷ (entry − stop), capped at the max position, rounded down to Binance's lot step, and checked against the minimum order size.</p></div>`;
+}
+function renderRisk() { const el = $("#v-risk"); if (!el) return; el.innerHTML = riskForm() + `<div class="card" style="margin-top:14px" id="rk-list"></div>`; renderRiskList(); }
+let rkInfoReq = 0;
+function renderRiskList() {
+  const el = $("#rk-list"); if (!el || !S.rows) return;
+  const list = S.rows.filter(c => c.ev && c.ev.plan && c.ev.state !== "Waiting").sort((a, b) => (b.ev.plan.src === "signal") - (a.ev.plan.src === "signal") || Math.abs(b.score) - Math.abs(a.score));
+  const missing = list.map(c => c.sym).filter(s => !XI.has(s));
+  if (missing.length && Date.now() - rkInfoReq > 10000) { rkInfoReq = Date.now(); exInfo(missing).then(renderRiskList).catch(() => { }); }
+  const rows = list.map(c => { const p = c.ev.plan, side = c.ev.want, tg = side === "bull" ? p.entry + RK.tgt * p.risk : p.entry - RK.tgt * p.risk, rc = riskCheck(side, p.entry, p.stop, tg, XI.get(c.sym));
+    return `<tr class="click" data-open="${c.sym}"><td><b>${c.base}</b> <span class="pill ${side}">${side === "bull" ? "Long" : "Short"}</span></td><td><span class="pill ${stTone(c.ev)}">${shortState(c.ev.state)}</span> ${trendTag(side, true)}</td><td class="r num">${px(c, p.entry)}</td><td class="r num dn">${px(c, p.stop)} <span class="mut">${rc.stopPct.toFixed(2)}%</span></td><td class="r num">${rc.qty !== undefined ? +rc.qty.toPrecision(6) : "–"}</td><td class="r num">${money(rc.notional)}</td><td class="r num dn">${money(-rc.lossAtStop)}</td><td class="r num ${rc.feeR > 0.3 ? "dn" : ""}">${rc.feeR.toFixed(2)}R</td><td class="r num ${rc.rrNet < RK.minRR ? "dn" : "up"}">1:${rc.rrNet.toFixed(2)}</td><td><span class="pill ${verdictTone(rc.verdict)}" title="${esc(rc.reasons.join(" "))}">${rc.verdict}</span> <span class="mut why">${esc(rc.reasons[0] || (rc.capped ? "capped size" : ""))}</span></td><td><button class="tmbtn" data-tm="${c.sym}" data-side="${side}" title="Replay this setup on past candles">⏱</button></td></tr>`; }).join("");
+  el.innerHTML = `<h3>Current setups vs your rules <span class="r mut">${list.length} coins with a live plan · target ${RK.tgt}R · ${hms(Date.now())} IST</span></h3><div class="tw"><table><thead><tr><th>Coin</th><th>State</th><th class="r">Entry</th><th class="r">Stop</th><th class="r">Qty</th><th class="r">Size</th><th class="r">Loss at stop</th><th class="r">Fees</th><th class="r">R:R net</th><th>Verdict</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="11" class="empty">No coin has a live setup right now.</td></tr>`}</tbody></table></div>`;
+}
+
+/* ---------- detail view hooks ---------- */
+const _dShell = detail.renderShell.bind(detail), _dRefresh = detail.refresh.bind(detail);
+detail.renderShell = function () {
+  _dShell(); const c = this.c;
+  $("#dplan").insertAdjacentHTML("afterend", `<div class="card" style="margin-top:14px" id="drisk"><h3>Risk & budget check</h3><p class="note">Loading Binance filters…</p></div>`);
+  $("#tfseg").insertAdjacentHTML("beforebegin", `<button class="iconbtn tmhead" data-tm="${c.sym}" title="Replay this setup on past candles">⏱ Time Machine</button>`);
+  exInfo([c.sym]).then(() => this.refresh()).catch(() => { });
+};
+detail.refresh = function () {
+  _dRefresh(); const c = this.c, el = $("#drisk"); if (!c || !el) return;
+  const ev = S.tf === "5m" ? (c.ev || this.ev) : this.ev, p = ev && ev.plan;
+  if (!p) { el.innerHTML = `<h3>Risk & budget check</h3><p class="mut">No plan to size right now.</p>`; return; }
+  const side = ev.want, tg = side === "bull" ? p.entry + RK.tgt * p.risk : p.entry - RK.tgt * p.risk, rc = riskCheck(side, p.entry, p.stop, tg, XI.get(c.sym));
+  el.innerHTML = `<h3>Risk & budget check <span class="r">${trendTag(side)}</span></h3>${riskHTML(c, side, p, tg, rc)}<button class="btn" style="margin-top:10px;width:100%" data-tm="${c.sym}" data-side="${side}">⏱ Replay this setup on past candles</button>`;
+};
+
+/* ---------- wiring ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-tm]"); if (b) { e.stopPropagation(); e.preventDefault(); openTM(b.dataset.tm, b.dataset.side); return; }
+  if (e.target.id === "tm-run") { e.preventDefault(); runTM(); }
+}, true);
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "tm-mode") syncTMMode();
+  if (t.id === "tm-tf") { const N = $("#tm-N"); if (N) N.value = TF_N[t.value]; }
+  if (t.dataset && t.dataset.rk) { const k = t.dataset.rk, v = +t.value; if (isFinite(v)) { RK[k] = k === "maxOpen" || k === "openNow" ? Math.max(0, Math.round(v)) : v; RK.pnlDay = istDay(); saveRisk(); renderRisk(); if (S.sel) detail.refresh(); } }
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest && e.target.closest("#v-tm") && e.target.tagName === "INPUT") { e.preventDefault(); runTM(); } });
+setInterval(() => { if (S.tab === "risk" && !document.hidden) renderRiskList(); }, 5000);
+setInterval(loadTrend, 3600000);
+loadTrend();
 boot();
 </script>
 </body></html>
