@@ -115,18 +115,61 @@ ul.reasonsl{list-style:none;padding:0;margin:0;font-size:13px;display:grid;gap:4
 .setup{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card2)}.setup.bull{border-left:4px solid var(--bull)}.setup.bear{border-left:4px solid var(--bear)}
 @media (max-width:1100px){.crg{grid-template-columns:1fr}}
 @media (max-width:760px){.crverdict{grid-template-columns:1fr}.crchart{height:360px}.crpick .search{max-width:none}}
+/* ---- Paper trades (DEMO) ---- */
+.pill.demo{background:var(--warn-s);color:var(--warn);font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.callout.demo-c{border-color:var(--warn);background:var(--warn-s)}
+.tick.demotick{border-color:var(--warn)}
+.tmbtn.demob,.btn.demo-btn{border-color:var(--warn);color:var(--warn)}
+.btn.demo-btn{background:var(--warn-s)}
+.btn.demo-btn .mut{font-weight:400}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+.btn.danger{color:var(--bear);border-color:var(--bear)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.sbtns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.sbtns .btn{flex:1;min-height:44px}
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:460px;width:100%;max-height:92vh;overflow:auto;padding:14px 16px 18px;box-shadow:var(--sh)}
+.sheet .grab{display:none;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+.shead{display:flex;align-items:center;gap:8px;margin-bottom:10px}.shead b{font-size:17px}.shead .iconbtn{margin-left:auto}
+.form.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form.f2 input,.form.f2 select{font-size:16px;min-height:42px;width:100%}
+.seg.full{display:flex;width:100%}.seg.full button{flex:1;min-height:40px}
+body.sheet-open{overflow:hidden}
+.warn-t{color:var(--warn)}
+.dmtools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut)}.chk input{width:18px;height:18px}
+.dmcard{border-left:3px solid var(--bull)}.dmcard.bear{border-left-color:var(--bear)}
+.dmh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dmh .r{margin-left:auto}.big2{font-size:18px}
+.dmlive{display:flex;justify-content:space-between;align-items:flex-end;margin:10px 0 6px}.dmlive>div{display:flex;flex-direction:column}.dmlive .r{text-align:right;align-items:flex-end}
+.num.xl{font-size:24px;font-weight:700}
+.dmbar{position:relative;height:30px;margin:8px 0 4px;border-radius:8px;background:linear-gradient(90deg,var(--bear-s),var(--card2) 40%,var(--bull-s));display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;padding:0 6px 2px}
+.dmbar i{position:absolute;top:2px;width:3px;height:14px;background:var(--txt);border-radius:2px;transform:translateX(-50%)}
+.dmkv{grid-template-columns:repeat(4,1fr)}
+.dmchart{height:220px;margin-top:10px;position:relative}
+.dmtm{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media (max-width:640px){
+  .sheetbg{align-items:flex-end;padding:0}
+  .sheet{border-radius:18px 18px 0 0;max-width:none;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+  .sheet .grab{display:block}
+  .dmkv{grid-template-columns:1fr 1fr}
+  .dmchart{height:190px}
+  .num.xl{font-size:21px}
+  .dmtm .btn{width:100%}
+}
+.btn.danger,.btn.ghost.danger{background:transparent;color:var(--bear);border:1px solid var(--bear)}
+.dmsec{margin:18px 2px 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}.dmsec .mut{text-transform:none;letter-spacing:0;font-weight:400}
 </style></head>
 <body>
 <header class="top"><div class="bar">
   <div class="brand"><div class="logo">OB</div><span>Order Block Scanner</span><span class="pill acc">LIVE</span></div>
-  <div class="tick" id="tbtc">BTC</div><div class="tick eth" id="teth">ETH</div><div class="tick trend" id="btctrend"><span class="mut">BTC trend</span> <b>–</b></div>
+  <div class="tick" id="tbtc">BTC</div><div class="tick eth" id="teth">ETH</div><div class="tick trend" id="btctrend"><span class="mut">BTC trend</span> <b>–</b></div><div class="tick demotick" id="demotick" style="display:none;cursor:pointer"></div>
   <div class="spacer"></div>
   <div class="status" id="st"></div><span class="mut num" style="font-size:12px" id="upd">Loading…</span><b class="num" id="clock" style="font-size:13px"></b>
   <button class="iconbtn" id="bnotify" title="Browser notifications for top-coin signals">🔕 Alerts</button>
   <button class="iconbtn" id="bsound" title="Play a sound on signals">♪ Sound</button>
   <button class="iconbtn" id="theme" title="Light or dark">☾</button>
 </div>
-<nav class="tabs"><button data-tab="scanner" class="on">Scanner</button><button data-tab="signals">Signals <span class="badge" id="sigbadge" style="display:none"></span></button><button data-tab="report">📊 Coin report</button><button data-tab="tm">⏱ Time Machine</button><button data-tab="risk">Risk</button><button data-tab="liq">Liquidations</button><button data-tab="bt">Backtest</button><button data-tab="about">How it works</button></nav></header>
+<nav class="tabs"><button data-tab="scanner" class="on">Scanner</button><button data-tab="signals">Signals <span class="badge" id="sigbadge" style="display:none"></span></button><button data-tab="report">📊 Coin report</button><button data-tab="demo">🧪 Demo <span class="badge" id="demobadge" style="display:none"></span></button><button data-tab="tm">⏱ Time Machine</button><button data-tab="risk">Risk</button><button data-tab="liq">Liquidations</button><button data-tab="bt">Backtest</button><button data-tab="about">How it works</button></nav></header>
 <main>
 <section id="v-scanner">
   <div id="loading" class="loading"><div class="spin"></div><div id="loadmsg">Connecting to Binance…</div></div>
@@ -143,6 +186,7 @@ ul.reasonsl{list-style:none;padding:0;margin:0;font-size:13px;display:grid;gap:4
 </section>
 <section id="v-signals" style="display:none"></section>
 <section id="v-report" style="display:none"></section>
+<section id="v-demo" style="display:none"></section>
 <section id="v-tm" style="display:none"></section>
 <section id="v-risk" style="display:none"></section>
 <section id="v-liq" style="display:none"></section>
@@ -629,7 +673,7 @@ const render = {
   },
   lists() {
     const tbl = (list, side) => `<div class="tw"><table><thead><tr><th>#</th><th>Coin</th><th class="r">Price</th><th class="r">24h</th><th class="r">vs VWAP</th><th class="r">Score</th><th>Build-up</th><th>Signal</th></tr></thead><tbody>` +
-      (list.length ? list.slice(0, TOP).map((s, i) => { const c = S.coins.get(s); return `<tr class="click" data-open="${s}"><td class="mut">${i + 1}</td><td><b>${c.base}</b> <span class="dim">${c.sector}</span></td><td class="r num">${px(c, c.last)}</td><td class="r num ${cls(c.chg24)}">${pct(c.chg24)}</td><td class="r num ${cls(c.vwapDist)}">${pct(c.vwapDist)}</td><td class="r num"><b class="${side === "bull" ? "up" : "dn"}">${scoreOf(c)}</b></td><td><span class="pill ${buTone(c.buildup)}">${c.buildup}</span></td><td>${c.ev ? `<span class="pill ${stTone(c.ev)}">${shortState(c.ev.state)}</span>` : ""} <button class="tmbtn sm" data-tm="${s}" data-side="${side}" title="Time Machine replay">⏱</button><button class="tmbtn sm" data-cr="${s}" title="Coin report">📊</button></td></tr>`; }).join("") : `<tr><td colspan="8" class="empty">No coins qualify right now</td></tr>`) + `</tbody></table></div>`;
+      (list.length ? list.slice(0, TOP).map((s, i) => { const c = S.coins.get(s); return `<tr class="click" data-open="${s}"><td class="mut">${i + 1}</td><td><b>${c.base}</b> <span class="dim">${c.sector}</span></td><td class="r num">${px(c, c.last)}</td><td class="r num ${cls(c.chg24)}">${pct(c.chg24)}</td><td class="r num ${cls(c.vwapDist)}">${pct(c.vwapDist)}</td><td class="r num"><b class="${side === "bull" ? "up" : "dn"}">${scoreOf(c)}</b></td><td><span class="pill ${buTone(c.buildup)}">${c.buildup}</span></td><td>${c.ev ? `<span class="pill ${stTone(c.ev)}">${shortState(c.ev.state)}</span>` : ""} <button class="tmbtn sm" data-tm="${s}" data-side="${side}" title="Time Machine replay">⏱</button><button class="tmbtn sm" data-cr="${s}" title="Coin report">📊</button><button class="tmbtn sm demob" data-demo="${s}" data-side="${side}"${c.ev && c.ev.plan && c.ev.want === side ? ` data-entry="${c.ev.plan.entry}" data-stop="${c.ev.plan.stop}"` : ""} data-src="top list" title="Demo entry (no real money)">▶</button></td></tr>`; }).join("") : `<tr><td colspan="8" class="empty">No coins qualify right now</td></tr>`) + `</tbody></table></div>`;
     $("#lbull").innerHTML = `<h3><span class="up">▲ Top ${TOP} bullish</span><span class="r mut">${S.bull.length} qualify · score > 0, above VWAP</span></h3>` + tbl(S.bull, "bull");
     $("#lbear").innerHTML = `<h3><span class="dn">▼ Top ${TOP} bearish</span><span class="r mut">${S.bear.length} qualify · score < 0, below VWAP</span></h3>` + tbl(S.bear, "bear");
   },
@@ -657,7 +701,7 @@ const render = {
           <span>Taker flow 1h</span><b class="num ${cls(c.delta1h)}">${usd(c.delta1h)}</b>
         </div>
         ${spark(closes)}
-        <div class="f">${ev ? `<span class="pill ${stTone(ev)}">${shortState(ev.state)}</span>` : ""}${ev && ev.state !== "Waiting" ? trendTag(ev.want, true) : ""}<button class="tmbtn" data-tm="${c.sym}" data-side="${ev ? ev.want : c.bias}" title="Time Machine: replay this setup on ${c.base}'s past candles">⏱ Replay</button><button class="tmbtn" style="margin-left:0" data-cr="${c.sym}" title="Full live report for ${c.base}">📊 Report</button></div>
+        <div class="f">${ev ? `<span class="pill ${stTone(ev)}">${shortState(ev.state)}</span>` : ""}${ev && ev.state !== "Waiting" ? trendTag(ev.want, true) : ""}<button class="tmbtn" data-tm="${c.sym}" data-side="${ev ? ev.want : c.bias}" title="Time Machine: replay this setup on ${c.base}'s past candles">⏱ Replay</button><button class="tmbtn" style="margin-left:0" data-cr="${c.sym}" title="Full live report for ${c.base}">📊 Report</button>${demoBtn(c.sym, ev ? ev.want : c.bias, ev && ev.state !== "Waiting" ? ev.plan : null, "scanner card")}</div>
       </div>`; }).join("") : `<div class="empty">No coins match.</div>`;
   },
   scanner() { if (!S.rows) return; render.bias(); render.sectors(); render.lists(); render.cards(); },
@@ -665,7 +709,7 @@ const render = {
     const L = S.log;
     $("#v-signals").innerHTML = `<div class="card"><h3>Signals log <span class="r" style="display:flex;gap:8px;align-items:center"><label class="mut"><input type="checkbox" id="loginfo" ${S.logInfo ? "checked" : ""}> also log coins outside the top lists</label><button class="iconbtn" id="clearlog">Clear</button></span></h3>
     <p class="note">Logged in this browser while the page is open and saved in localStorage. <b>Alert</b> rows come from top-${TOP} coins: either a confirmed reversal off a fresh 5m order block on the right side of VWAP, or a pin-bar exit warning on an open setup. Alert rows trigger a notification and a sound if you turned those on. <b>Zone</b> rows mean a top coin's price entered a zone. <b>Info</b> rows are the same signals on other coins. For 24/7 alerts, run alerts.py on a server.</p>
-    ${L.length ? `<div class="tw"><table><thead><tr><th>Time (IST)</th><th>Coin</th><th>Type</th><th>State</th><th class="r">Price</th><th class="r">Entry</th><th class="r">Stop</th><th class="r">1:2</th><th class="r">1:4.6</th><th>Detail</th><th></th></tr></thead><tbody>${L.map(e => { const c = S.coins.get(e.sym); const p = e.plan; return `<tr class="click" data-open="${e.sym}"><td class="num">${dmh(e.t)}</td><td><b>${baseOf(e.sym)}</b></td><td><span class="pill ${e.level === "alert" ? "acc" : e.level === "zone" ? "warn" : ""}">${e.level}</span></td><td>${esc(e.state)}</td><td class="r num">${px(c, e.px)}</td><td class="r num">${p ? px(c, p.entry) : "–"}</td><td class="r num">${p ? px(c, p.stop) : "–"}</td><td class="r num">${p ? px(c, p.t2) : "–"}</td><td class="r num">${p ? px(c, p.t46) : "–"}</td><td style="white-space:normal;min-width:260px" class="mut">${esc(e.detail)}</td><td><button class="tmbtn" data-tm="${e.sym}" data-side="${/bullish|long/i.test(e.state + " " + e.detail) ? "bull" : "bear"}" title="Time Machine: replay this setup">⏱</button></td></tr>`; }).join("")}</tbody></table></div>` : `<div class="empty">No signals yet. They appear here when a 5-minute candle closes with a setup.</div>`}</div>`;
+    ${L.length ? `<div class="tw"><table><thead><tr><th>Time (IST)</th><th>Coin</th><th>Type</th><th>State</th><th class="r">Price</th><th class="r">Entry</th><th class="r">Stop</th><th class="r">1:2</th><th class="r">1:4.6</th><th>Detail</th><th></th></tr></thead><tbody>${L.map(e => { const c = S.coins.get(e.sym); const p = e.plan; return `<tr class="click" data-open="${e.sym}"><td class="num">${dmh(e.t)}</td><td><b>${baseOf(e.sym)}</b></td><td><span class="pill ${e.level === "alert" ? "acc" : e.level === "zone" ? "warn" : ""}">${e.level}</span></td><td>${esc(e.state)}</td><td class="r num">${px(c, e.px)}</td><td class="r num">${p ? px(c, p.entry) : "–"}</td><td class="r num">${p ? px(c, p.stop) : "–"}</td><td class="r num">${p ? px(c, p.t2) : "–"}</td><td class="r num">${p ? px(c, p.t46) : "–"}</td><td style="white-space:normal;min-width:260px" class="mut">${esc(e.detail)}</td><td><button class="tmbtn" data-tm="${e.sym}" data-side="${/bullish|long/i.test(e.state + " " + e.detail) ? "bull" : "bear"}" title="Time Machine: replay this setup">⏱</button>${demoBtn(e.sym, /bullish|long/i.test(e.state + " " + e.detail) ? "bull" : "bear", p, "signal " + dmh(e.t), "sm")}</td></tr>`; }).join("")}</tbody></table></div>` : `<div class="empty">No signals yet. They appear here when a 5-minute candle closes with a setup.</div>`}</div>`;
   },
   liq() {
     const t = Date.now() - 3600000; let L = 0, Sh = 0; for (const x of S.liq) if (x.t > t) { if (x.side === "Long") L += x.usd; else Sh += x.usd; }
@@ -914,8 +958,8 @@ function renderAbout() {
 /* ---------------- UI wiring ---------------- */
 function setTab(t) {
   S.tab = t; for (const b of document.querySelectorAll("nav.tabs button")) b.classList.toggle("on", b.dataset.tab === t);
-  for (const v of ["scanner", "signals", "report", "tm", "risk", "liq", "bt", "about"]) $("#v-" + v).style.display = v === t ? "" : "none";
-  if (t === "scanner") render.scanner(); if (t === "signals") render.signals(); if (t === "liq") render.liq(); if (t === "bt") renderBacktest(); if (t === "about") renderAbout(); if (t !== "report" && typeof crStop === "function" && CR.charts.main) { crStop(); CR.loadedSym = null; } if (t === "report") renderReportTab(); if (t === "tm") renderTM(); if (t === "risk") renderRisk();
+  for (const v of ["scanner", "signals", "report", "demo", "tm", "risk", "liq", "bt", "about"]) $("#v-" + v).style.display = v === t ? "" : "none";
+  if (t === "scanner") render.scanner(); if (t === "signals") render.signals(); if (t === "liq") render.liq(); if (t === "bt") renderBacktest(); if (t === "about") renderAbout(); if (t !== "report" && typeof crStop === "function" && CR.charts.main) { crStop(); CR.loadedSym = null; } if (t === "report") renderReportTab(); if (t === "demo") renderDemo(); if (t === "tm") renderTM(); if (t === "risk") renderRisk();
 }
 function wire() {
   document.addEventListener("click", e => {
@@ -1630,7 +1674,7 @@ function crRefresh() {
       <p class="note" style="margin:6px 0 8px">${esc(s.ev.detail)}</p>
       <div class="plan"><span>Entry</span><b class="num">${px(c, s.p.entry)}</b><span>Stop</span><b class="num dn">${px(c, s.p.stop)} <span class="mut">(${s.p.riskPct.toFixed(2)}%)</span></b><span>Target ${(+RK.tgt)}R</span><b class="num up">${px(c, s.t2)}</b><span>Next level</span><b class="num">${s.next ? `${px(c, s.next.px)} <span class="mut">${esc(s.next.label)} · ${(Math.abs(s.next.px - s.p.entry) / s.p.risk).toFixed(1)}R</span>` : "–"}</b></div>
       <div style="margin-top:10px">${riskHTML(c, s.side, s.p, s.t2, rc, true)}</div>
-      <button class="btn" style="margin-top:10px;width:100%" data-crtm="${i}">⏱ Replay this setup on past ${s.tf} candles</button></div>`; }).join("")}</div>` :
+      <div class="sbtns"><button class="btn demo-btn" data-crdemo="${i}">▶ Demo entry <span class="mut">no real money</span></button><button class="btn" style="flex:1" data-crtm="${i}">⏱ Replay this setup on past ${s.tf} candles</button></div></div>`; }).join("")}</div>` :
     `<div class="empty" style="padding:16px">Price isn't near a fresh order block on 5m or 1h right now, so there's no setup to size. ${A.zones.length ? `Nearest zone: ${zn[0] ? `${zn[0].tf} ${sideWord(zn[0].side).toLowerCase()} at ${px(c, zn[0].side === "bull" ? zn[0].top : zn[0].bot)} (${dist(zn[0].side === "bull" ? zn[0].top : zn[0].bot, A.px)})` : ""}.` : ""}</div>`));
   // extras
   const P = A.perf, rel = (a, b) => a === null || b === null || b === undefined ? null : a - b;
@@ -1726,6 +1770,301 @@ document.addEventListener("click", e => {
 function crReopen() { const g = CR.gen, sym = CR.sym; crOpenStreams(g); CR.timers.push(setInterval(() => { if (!document.hidden) crLoadDepth(sym, g); }, 20000)); CR.timers.push(setInterval(() => { if (!document.hidden) { crLoadFut(sym, g); crLoadTicker(sym, g); } }, 60000)); CR.timers.push(setInterval(() => { if (!document.hidden && g === CR.gen) crRefresh(); }, 2000));
   if (CR.tf !== "5m" && CR.tf !== "1d") kl(sym, CR.tf, 500).then(k => { if (g === CR.gen) { CR.k[CR.tf] = k; crSetMainData(); crOverlay(); } }).catch(() => { }); }
 document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "cr-sym") { e.preventDefault(); crGo(); } });
+
+/* ---------------- Paper trades (DEMO, no real money) ---------------- */
+const DM_DEF = { start: 200, open: [], closed: [], be: false, pin: true, seq: 1 };
+const DM = Object.assign({}, DM_DEF, LS.get("demo", {}));
+const dmSave = () => LS.set("demo", { start: DM.start, open: DM.open, closed: DM.closed, be: DM.be, pin: DM.pin, seq: DM.seq });
+const DEMO_TAG = `<span class="pill demo" title="Paper trade: simulated in this browser only. Nothing is sent to Binance.">DEMO · no real money</span>`;
+const dmInfo = sym => S.coins.get(sym) || S.info.get(sym) || null;
+const dmCost = () => (RK.fee + RK.slip) / 100;
+const dmLive = {}; // sym -> last price
+let dmStream = null, dmKey = "", dmSheet = null, dmCharts = new Map(), dmBusy = new Set();
+function dmNotify(title, body, sound) {
+  toast(`<b>🧪 ${esc(title)}</b><br><span class="mut">${esc(body)}</span>`);
+  if (S.notify && "Notification" in window && Notification.permission === "granted") { try { new Notification("DEMO · " + title, { body, tag: "demo" + title }); } catch (e) { } }
+  if (S.sound && sound !== false) beep();
+}
+function dmCalc(t, p) {
+  const dir = t.side === "bull" ? 1 : -1, c = dmCost(), risk0 = Math.abs(t.entry - t.stop0) * t.qty;
+  const gross = (p - t.entry) * dir * t.qty, feeIn = t.qty * t.entry * c, feeOut = t.qty * p * c, net = gross - feeIn - feeOut;
+  return { gross, feeIn, feeOut, net, R: risk0 ? net / risk0 : 0, pctMove: (p / t.entry - 1) * dir * 100, toStop: (t.stop / p - 1) * 100, toTgt: (t.target / p - 1) * 100, risk0 };
+}
+async function dmPrice(sym) {
+  const j = await spot(`/api/v3/ticker/price?symbol=${sym}`); return +j.price;
+}
+
+/* ---------- confirm sheet ---------- */
+async function openDemo(o) {
+  const sym = (o.sym || "").toUpperCase(); if (sym && !S.info.has(sym) && S.info.size) { toast(`${esc(sym)} isn't a Binance USDT spot pair.`); return; }
+  dmSheet = { sym, side: o.side || "bull", sigEntry: o.entry ? +o.entry : null, stop: o.stop ? +o.stop : null, src: o.src || "manual", tmode: o.tmode || (+RK.tgt === 4.6 ? "4.6" : "2"), custom: o.target ? +o.target : null, useSig: !!o.useSig, live: null, manual: !sym };
+  dmRenderSheet(); if (sym) await dmSheetSym(sym);
+}
+async function dmSheetSym(sym) {
+  const s = dmSheet; if (!s) return; s.sym = sym; s.live = null; dmRenderSheet();
+  try { const [p] = await Promise.all([dmPrice(sym), exInfo([sym])]); if (dmSheet !== s) return; s.live = p;
+    if (!s.stop) { const c = S.coins.get(sym), pl = c && c.ev && c.ev.plan && c.ev.want === s.side ? c.ev.plan : null; s.stop = pl ? pl.stop : +(p * (s.side === "bull" ? 0.99 : 1.01)).toPrecision(6); if (pl && !s.sigEntry) s.sigEntry = pl.entry; }
+  } catch (e) { s.err = "Couldn't load the live price: " + e.message; }
+  dmRenderSheet();
+}
+function dmSheetVals() {
+  const s = dmSheet, entry = s.useSig && s.sigEntry ? s.sigEntry : s.live, stop = +s.stop, risk = Math.abs(entry - stop), dir = s.side === "bull" ? 1 : -1;
+  const target = s.tmode === "custom" ? +s.custom : dmRound(t0sym(s.sym), entry + dir * (+s.tmode) * risk);
+  const errs = [];
+  if (!(entry > 0)) errs.push("Waiting for a price.");
+  else if (!(stop > 0) || (stop - entry) * dir >= 0) errs.push(`The stop must be ${dir > 0 ? "below" : "above"} the entry.`);
+  else if (!(target > 0) || (target - entry) * dir <= 0) errs.push(`The target must be ${dir > 0 ? "above" : "below"} the entry.`);
+  if (!errs.length && s.useSig && s.live && ((s.live - stop) * dir <= 0)) errs.push("The live price is already past the stop, so this signal is dead.");
+  if (!errs.length && s.useSig && s.live && ((s.live - target) * dir >= 0)) errs.push("The live price is already past the target.");
+  const rc = entry > 0 && stop > 0 ? riskCheck(s.side, entry, stop, target, XI.get(s.sym)) : null;
+  return { entry, stop, target, risk, rc, errs };
+}
+function dmRenderSheet() {
+  let el = $("#dmsheet"); const s = dmSheet;
+  if (!s) { if (el) el.remove(); document.body.classList.remove("sheet-open"); return; }
+  if (!el) { el = document.createElement("div"); el.id = "dmsheet"; el.className = "sheetbg"; document.body.appendChild(el); document.body.classList.add("sheet-open"); }
+  const info = dmInfo(s.sym), v = s.sym && s.live ? dmSheetVals() : null, rc = v && v.rc;
+  const opts = [...S.info.keys()].sort();
+  const R2 = v ? v.entry + (s.side === "bull" ? 1 : -1) * 2 * v.risk : null, R46 = v ? v.entry + (s.side === "bull" ? 1 : -1) * 4.6 * v.risk : null;
+  const focusId = document.activeElement && document.activeElement.closest && document.activeElement.closest("#dmsheet") ? document.activeElement.id : null;
+  el.innerHTML = `<div class="sheet" role="dialog" aria-label="Demo entry">
+    <div class="grab"></div>
+    <div class="shead"><b>▶ Demo entry</b>${DEMO_TAG}<button class="iconbtn" id="dm-x" aria-label="Close">✕</button></div>
+    <div class="form f2">
+      <label>Coin<input id="dm-sym" list="dm-list" value="${esc(s.sym ? baseOf(s.sym) : "")}" placeholder="e.g. NIL" autocomplete="off" ${s.manual ? "" : "readonly"}><datalist id="dm-list">${s.manual ? opts.map(x => `<option value="${baseOf(x)}">`).join("") : ""}</datalist></label>
+      <label>Side<select id="dm-side"><option value="bull" ${s.side === "bull" ? "selected" : ""}>Long</option><option value="bear" ${s.side === "bear" ? "selected" : ""}>Short (futures-only demo)</option></select></label>
+    </div>
+    ${s.side === "bear" ? `<div class="callout w" style="margin:8px 0">Shorts can't be done on Binance spot. This is a futures-style demo only.</div>` : ""}
+    ${!s.sym ? `<p class="note">Type a coin and press Load.</p><button class="btn" id="dm-load" style="width:100%">Load price</button>` : !s.live ? `<p class="note">${s.err ? esc(s.err) : "Loading live price…"}</p>` : `
+    <div class="seg full" style="margin:8px 0">${s.sigEntry ? `<button data-dmentry="sig" class="${s.useSig ? "on" : ""}">Signal entry ${px(info, s.sigEntry)}</button>` : ""}<button data-dmentry="live" class="${s.useSig && s.sigEntry ? "" : "on"}">Live price ${px(info, s.live)}</button></div>
+    <div class="form f2">
+      <label>Stop<input id="dm-stop" type="number" inputmode="decimal" step="any" value="${+(+s.stop).toPrecision(8)}"></label>
+      <label>Target<select id="dm-tmode"><option value="2" ${s.tmode === "2" ? "selected" : ""}>2R · ${px(info, R2)}</option><option value="4.6" ${s.tmode === "4.6" ? "selected" : ""}>4.6R · ${px(info, R46)}</option><option value="custom" ${s.tmode === "custom" ? "selected" : ""}>Custom</option></select></label>
+      ${s.tmode === "custom" ? `<label style="grid-column:1/-1">Custom target<input id="dm-custom" type="number" inputmode="decimal" step="any" value="${s.custom ? +(+s.custom).toPrecision(8) : +(R2).toPrecision(8)}"></label>` : ""}
+    </div>
+    ${v.errs.length ? `<div class="callout" style="margin-top:8px">${esc(v.errs[0])}</div>` : `<div class="plan" style="margin-top:10px">
+      <span>Entry</span><b class="num">${px(info, v.entry)} <span class="mut">${s.useSig && s.sigEntry ? "signal price" : "live"}</span></b>
+      <span>Stop</span><b class="num dn">${px(info, v.stop)} <span class="mut">${(v.risk / v.entry * 100).toFixed(2)}%</span></b>
+      <span>Target</span><b class="num up">${px(info, v.target)} <span class="mut">${(Math.abs(v.target - v.entry) / v.risk).toFixed(2)}R</span></b>
+      <span>Size (Risk tab: ${RK.riskPct}% of ${money(+RK.acct, 0)})</span><b class="num">${+(+rc.qty).toPrecision(8)} ${baseOf(s.sym)} · ${money(rc.notional)}</b>
+      <span>Loss at stop / gain at target, after fees</span><b class="num"><span class="dn">${money(-rc.lossAtStop)}</span> / <span class="up">${money(rc.gainAtTgt)}</span></b>
+      <span>Fees ${RK.fee}% + slippage ${RK.slip}% per side</span><b class="num">${money(rc.feesStop, 3)} · ${rc.feeR.toFixed(2)}R</b>
+    </div>
+    ${rc.verdict !== "OK" ? `<p class="note warn-t">Real-money check: ${rc.verdict}. ${esc(rc.reasons[0] || "")} The demo still runs so you can watch it.</p>` : `<p class="note">Real-money check: OK, fits your Risk rules.</p>`}`}
+    <div class="sbtns"><button class="btn ghost" id="dm-cancel">Cancel</button><button class="btn" id="dm-go" ${v.errs.length || !(rc && rc.qty > 0) ? "disabled" : ""}>▶ Start demo trade</button></div>`}
+  </div>`;
+  if (focusId && $("#" + focusId)) { const f = $("#" + focusId); f.focus(); if (f.setSelectionRange && f.type !== "number") { const n = f.value.length; f.setSelectionRange(n, n); } }
+}
+const t0sym = sym => dmInfo(sym) || {};
+const dmRound = (i, x) => i.tick ? +(Math.round(x / i.tick) * i.tick).toFixed(i.dec ?? 8) : +x.toPrecision(8);
+function dmStart() {
+  const s = dmSheet; if (!s) return; const v = dmSheetVals(); if (v.errs.length || !(v.rc && v.rc.qty > 0)) return;
+  const t = { id: DM.seq++, sym: s.sym, side: s.side, entry: v.entry, stop: v.stop, stop0: v.stop, target: dmRound(t0sym(s.sym), v.target), rr: +(Math.abs(v.target - v.entry) / v.risk).toFixed(2), qty: v.rc.qty, notional: v.rc.qty * v.entry,
+    t0: Date.now(), src: s.src, fill: s.useSig && s.sigEntry ? "signal" : "live", hi: v.entry, lo: v.entry, last: s.live, chk: Date.now(), be: false, pinAt: 0, realCheck: v.rc.verdict };
+  DM.open.push(t); dmSave(); dmSheet = null; dmRenderSheet(); dmSync();
+  dmNotify(`${baseOf(t.sym)} ${t.side === "bull" ? "long" : "short"} opened`, `Entry ${px(dmInfo(t.sym), t.entry)} · stop ${px(dmInfo(t.sym), t.stop)} · target ${px(dmInfo(t.sym), t.target)} (${t.rr}R)`);
+  setTab("demo");
+}
+
+/* ---------- live tracking ---------- */
+function dmSync() {
+  const syms = [...new Set(DM.open.map(t => t.sym.toLowerCase()))].sort(), key = syms.join(",");
+  dmTick();
+  if (key === dmKey && dmStream) return; dmKey = key;
+  if (dmStream) { dmStream.stop(); dmStream = null; }
+  if (!syms.length) { S.conn.demo = "off"; return; }
+  dmStream = new Stream("demo", SPOT_WS, () => "/stream?streams=" + syms.flatMap(s => [`${s}@aggTrade`, `${s}@kline_1m`, `${s}@kline_5m`]).join("/"), dmMsg);
+  dmStream.open();
+}
+function dmMsg(d) {
+  if (!d || !d.s) return; const sym = d.s;
+  if (d.e === "aggTrade") { const p = +d.p; dmLive[sym] = p; for (const t of DM.open.filter(x => x.sym === sym)) dmPx(t, p, p, p, d.T, "live"); return; }
+  if (d.e === "kline") { const k = d.k, h = +k.h, l = +k.l, c = +k.c; dmLive[sym] = c;
+    for (const t of DM.open.filter(x => x.sym === sym)) {
+      if (k.i === "1m") { if (k.t >= t.t0) dmPx(t, c, h, l, k.T, "live"); else dmPx(t, c, c, c, k.T, "live"); if (k.x) t.chk = Math.max(t.chk, k.T + 1); const ch = dmCharts.get(t.id); if (ch) ch.s.update({ time: (k.t + IST) / 1000, open: +k.o, high: h, low: l, close: c }); }
+      if (k.i === "5m" && k.x && DM.pin && k.t >= t.t0 - 300000) { const kk = [k.t, +k.o, h, l, c]; const pin = t.side === "bull" ? OB.isBearPin(kk) && c > t.entry : OB.isBullPin(kk) && c < t.entry;
+        if (pin && t.pinAt !== k.t) { t.pinAt = k.t; dmNotify(`${baseOf(sym)}: pin-bar exit warning`, `A ${t.side === "bull" ? "bearish" : "bullish"} pin bar closed on 5m while the demo is in profit (${fR(dmCalc(t, c).R)}). The reel's exit cue: consider Close.`); dmSave(); } }
+    }
+  }
+}
+// price update with candle extremes; stop wins if both touched
+function dmPx(t, last, hi, lo, at, how) {
+  if (!DM.open.includes(t)) return;
+  const bull = t.side === "bull";
+  t.last = last; t.hi = Math.max(t.hi, hi); t.lo = Math.min(t.lo, lo);
+  const hitStop = bull ? lo <= t.stop : hi >= t.stop, hitTgt = bull ? hi >= t.target : lo <= t.target;
+  if (hitStop) return dmClose(t, t.stop, t.be && Math.abs(t.stop - t.entry) < 1e-12 ? "Breakeven stop" : "Stop hit", at, how);
+  if (hitTgt) return dmClose(t, t.target, "Target hit", at, how);
+  const r0 = Math.abs(t.entry - t.stop0);
+  if (DM.be && !t.be && (bull ? t.hi >= t.entry + r0 : t.lo <= t.entry - r0)) { t.be = true; t.stop = t.entry; dmSave(); dmNotify(`${baseOf(t.sym)}: stop moved to breakeven`, `Price reached +1R, so the demo stop is now the entry ${px(dmInfo(t.sym), t.entry)}.`, false); dmChartLines(t); }
+}
+function dmClose(t, exitPx, why, at, how) {
+  const i = DM.open.indexOf(t); if (i < 0) return; DM.open.splice(i, 1);
+  const k = dmCalc(t, exitPx), r0 = Math.abs(t.entry - t.stop0), dir = t.side === "bull" ? 1 : -1;
+  const done = { ...t, exit: exitPx, t1: at || Date.now(), why, how: how || "live", net: k.net, R: k.R, fees: k.feeIn + k.feeOut, mfe: (dir > 0 ? t.hi - t.entry : t.entry - t.lo) / r0, mae: (dir > 0 ? t.lo - t.entry : t.entry - t.hi) / r0 };
+  DM.closed.unshift(done); dmSave();
+  dmNotify(`${baseOf(t.sym)} demo closed: ${why}`, `${fR(k.R)} · ${money(k.net)} after fees${how === "reopen" ? " (resolved on reopen)" : how === "catchup" ? " (found by catch-up check)" : ""}`);
+  const ch = dmCharts.get(t.id); if (ch) { ch.chart.remove(); dmCharts.delete(t.id); }
+  dmSync(); if (S.tab === "demo") renderDemo();
+}
+// 1m kline catch-up: page reopened, tab woke up, or a missed stream
+async function dmBackfill(t, how) {
+  if (dmBusy.has(t.id)) return; dmBusy.add(t.id);
+  try {
+    let from = Math.max(t.t0, t.chk - 60000);
+    while (DM.open.includes(t) && from < Date.now() - 1000) {
+      const k = (await spot(`/api/v3/klines?symbol=${t.sym}&interval=1m&startTime=${from}&limit=1000`)).map(parseK);
+      if (!k.length) break;
+      for (const c of k) {
+        if (!DM.open.includes(t)) break;
+        const closed = c[0] + 60000 <= Date.now();
+        // candles that started before the entry: their high/low may predate the fill, so only the close counts
+        if (c[0] >= t.t0) dmPx(t, c[4], c[2], c[3], Math.min(c[0] + 59999, Date.now()), how);
+        else if (c[0] + 60000 > t.t0) dmPx(t, c[4], c[4], c[4], Math.min(c[0] + 59999, Date.now()), how);
+        if (closed) t.chk = Math.max(t.chk, c[0] + 60000);
+      }
+      if (k.length < 1000) break; from = k[k.length - 1][0] + 60000;
+    }
+  } catch (e) { console.warn("demo backfill", e.message); }
+  dmBusy.delete(t.id); dmSave();
+}
+async function dmCatchUp(how) { for (const t of [...DM.open]) await dmBackfill(t, how); dmTick(); if (S.tab === "demo") renderDemo(); }
+
+/* ---------- UI ---------- */
+function dmTick() {
+  const n = DM.open.length, el = $("#demotick"), b = $("#demobadge");
+  if (b) { b.textContent = n || ""; b.style.display = n ? "" : "none"; }
+  if (el) { if (!n) { el.style.display = "none"; } else { const R = DM.open.reduce((a, t) => a + dmCalc(t, t.last || t.entry).R, 0); el.style.display = ""; el.innerHTML = `<span class="mut">🧪 Demo</span> <b>${n} open</b> <b class="num ${cls(R)}">${fR(R)}</b>`; } }
+  if (S.tab === "demo") dmUpdateOpen();
+}
+const dur = ms => { const m = Math.floor(ms / 60000); return m < 60 ? `${m}m` : m < 1440 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${Math.floor(m / 1440)}d ${Math.floor(m % 1440 / 60)}h`; };
+function dmStats() {
+  const C = DM.closed.slice().reverse(), n = C.length, wins = C.filter(t => t.net > 0).length, totR = C.reduce((a, t) => a + t.R, 0), pnl = C.reduce((a, t) => a + t.net, 0);
+  let eq = DM.start, peak = eq, dd = 0; const curve = [eq]; for (const t of C) { eq += t.net; curve.push(eq); peak = Math.max(peak, eq); dd = Math.min(dd, eq - peak); }
+  const openPnl = DM.open.reduce((a, t) => a + dmCalc(t, t.last || t.entry).net, 0);
+  return { n, wins, totR, pnl, eq, curve, dd, avgR: n ? totR / n : 0, openPnl };
+}
+function eqSVG(curve) {
+  if (curve.length < 2) return `<div class="empty" style="padding:14px">The equity curve appears after the first closed demo trade.</div>`;
+  const W = 600, H = 140, mn = Math.min(...curve), mx = Math.max(...curve), sp = mx - mn || 1, x = i => i / (curve.length - 1) * W, y = v => H - 8 - (v - mn) / sp * (H - 16);
+  const pts = curve.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" "), up = curve[curve.length - 1] >= curve[0];
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:140px"><line x1="0" x2="${W}" y1="${y(curve[0])}" y2="${y(curve[0])}" stroke="var(--line)" stroke-dasharray="4 4"/><polyline fill="none" stroke="var(${up ? "--bull" : "--bear"})" stroke-width="2" points="${pts}"/></svg>`;
+}
+function dmOpenCard(t) {
+  return `<div class="card dmcard ${t.side}" id="dmc-${t.id}">
+    <div class="dmh"><b class="big2">${baseOf(t.sym)}</b><span class="pill ${t.side}">${t.side === "bull" ? "Long" : "Short · futures-only demo"}</span>${DEMO_TAG}<span class="r"><button class="btn sm danger" data-dmclose="${t.id}">Close</button></span></div>
+    <div id="dms-${t.id}"></div>
+    <div class="dmchart" id="dmch-${t.id}"></div>
+    <p class="note" style="margin:6px 0 0">Opened ${dmh(t.t0)} IST · ${t.fill === "signal" ? "filled at the signal price" : "filled at the live price"} · from ${esc(t.src)} · real-money check at entry: ${esc(t.realCheck || "–")}</p>
+  </div>`;
+}
+function dmStatsHTML(t) {
+  const info = dmInfo(t.sym), p = t.last || t.entry, k = dmCalc(t, p), r0 = Math.abs(t.entry - t.stop0), dir = t.side === "bull" ? 1 : -1;
+  const mfe = (dir > 0 ? t.hi - t.entry : t.entry - t.lo) / r0, mae = (dir > 0 ? t.lo - t.entry : t.entry - t.hi) / r0;
+  const prog = Math.max(0, Math.min(100, ((p - t.stop) / (t.target - t.stop)) * 100));
+  return `<div class="dmlive"><div><span class="mut">Live</span><b class="num xl">${px(info, p)}</b></div><div class="r"><b class="num xl ${cls(k.net)}">${money(k.net)}</b><span class="num ${cls(k.R)}">${fR(k.R)} · ${pct(k.pctMove)}</span></div></div>
+    <div class="dmbar" title="Where price sits between stop and target"><i style="left:${prog}%"></i><span class="dn">Stop ${px(info, t.stop)}</span><span class="mut">Entry ${px(info, t.entry)}</span><span class="up">Target ${px(info, t.target)}</span></div>
+    <div class="kv dmkv">
+      <div><span>To stop</span><b class="num dn">${pct(k.toStop)}</b></div><div><span>To target</span><b class="num up">${pct(k.toTgt)}</b></div>
+      <div><span>Time in trade</span><b>${dur(Date.now() - t.t0)}</b></div><div><span>Size</span><b class="num">${+t.qty.toPrecision(6)} · ${money(t.notional)}</b></div>
+      <div><span>Best so far (MFE)</span><b class="num up">${fR(mfe)}</b></div><div><span>Worst so far (MAE)</span><b class="num dn">${fR(mae)}</b></div>
+      <div><span>Fees in / out (est.)</span><b class="num">${money(k.feeIn, 3)} / ${money(k.feeOut, 3)}</b></div><div><span>Stop</span><b>${t.be ? "moved to breakeven" : "original"}${t.pinAt ? ` · <span class="warn-t">pin-bar warning ${hms(t.pinAt + 300000).slice(0, 5)}</span>` : ""}</b></div>
+    </div>`;
+}
+function dmUpdateOpen() { for (const t of DM.open) { const e = $("#dms-" + t.id); if (e) { const h = dmStatsHTML(t); if (e._h !== h) { e._h = h; e.innerHTML = h; } } } const st = $("#dm-sum"); if (st) { const h = dmSumHTML(); if (st._h !== h) { st._h = h; st.innerHTML = h; } } }
+function dmSumHTML() {
+  const s = dmStats();
+  return `<div class="kv"><div><span>Demo balance (start ${money(DM.start, 0)})</span><b class="num ${cls(s.eq - DM.start)}">${money(s.eq)}</b></div><div><span>Open P/L</span><b class="num ${cls(s.openPnl)}">${money(s.openPnl)}</b></div><div><span>Closed trades</span><b>${s.n}</b></div><div><span>Win rate</span><b>${s.n ? (s.wins / s.n * 100).toFixed(0) + "%" : "–"}</b></div><div><span>Total R</span><b class="num ${cls(s.totR)}">${fR(s.totR)}</b></div><div><span>Avg R / trade</span><b class="num ${cls(s.avgR)}">${s.n ? fR(s.avgR) : "–"}</b></div><div><span>Max drawdown</span><b class="num dn">${money(s.dd)}</b></div></div>`;
+}
+function renderDemo() {
+  const el = $("#v-demo"); if (!el) return;
+  for (const [, ch] of dmCharts) ch.chart.remove(); dmCharts.clear();
+  const s = dmStats(), J = DM.closed;
+  el.innerHTML = `<div class="callout demo-c"><b>🧪 DEMO · no real money.</b> Paper trades run only in this browser, using live Binance prices. Nothing is sent to Binance. Fees (${RK.fee}% + ${RK.slip}% slippage per side) are counted on entry and exit. If one candle touches both stop and target, the stop counts.</div>
+  <div class="dmtools"><button class="btn" data-demo-new>＋ Manual demo trade</button><label class="chk"><input type="checkbox" id="dm-be" ${DM.be ? "checked" : ""}> Move stop to breakeven at +1R</label><label class="chk"><input type="checkbox" id="dm-pin" ${DM.pin ? "checked" : ""}> Pin-bar exit warning (5m)</label></div>
+  <h3 class="dmsec">Open demo trades (${DM.open.length}) <span class="mut">live over WebSocket</span></h3>
+  ${DM.open.length ? `<div class="grid g2">${DM.open.map(dmOpenCard).join("")}</div>` : `<div class="card"><div class="empty">No open demo trade. Press <b>▶ Demo</b> on a signal, a coin report setup, a coin's detail panel or a Time Machine result, or start a manual one.</div></div>`}
+  <div class="card" style="margin-top:14px"><h3>Summary ${DEMO_TAG}</h3><div id="dm-sum">${dmSumHTML()}</div>${eqSVG(s.curve)}</div>
+  <div class="card" style="margin-top:14px"><h3>Journal (${J.length}) <span class="r"><button class="btn sm ghost" id="dm-csv" ${J.length ? "" : "disabled"}>⬇ CSV</button> <button class="btn sm ghost danger" id="dm-reset">Reset demo</button></span></h3>
+  ${J.length ? `<div class="tw"><table><thead><tr><th>Closed (IST)</th><th>Coin</th><th>Side</th><th class="r">Entry</th><th class="r">Exit</th><th>Result</th><th class="r">R</th><th class="r">P/L</th><th class="r">MFE / MAE</th><th>Held</th><th>Exit reason</th></tr></thead><tbody>${J.map(t => { const i = dmInfo(t.sym); return `<tr><td class="num">${dmh(t.t1)}</td><td><b>${baseOf(t.sym)}</b></td><td><span class="pill ${t.side}">${t.side === "bull" ? "Long" : "Short"}</span></td><td class="r num">${px(i, t.entry)}</td><td class="r num">${px(i, t.exit)}</td><td><span class="pill ${t.net > 0 ? "bull" : "bear"}">${t.net > 0 ? "Win" : "Loss"}</span></td><td class="r num ${cls(t.R)}">${fR(t.R)}</td><td class="r num ${cls(t.net)}">${money(t.net)}</td><td class="r num mut">${fR(t.mfe, 1)} / ${fR(t.mae, 1)}</td><td>${dur(t.t1 - t.t0)}</td><td>${esc(t.why)}${t.how === "reopen" ? ` <span class="pill warn">resolved on reopen</span>` : t.how === "catchup" ? ` <span class="pill">catch-up</span>` : ""}</td></tr>`; }).join("")}</tbody></table></div>` : `<div class="empty">Closed demo trades will show here.</div>`}</div>`;
+  for (const t of DM.open) dmChart(t);
+  dmUpdateOpen();
+}
+async function dmChart(t) {
+  const el = $("#dmch-" + t.id); if (!el || dmCharts.has(t.id)) return;
+  const chart = LightweightCharts.createChart(el, { autoSize: true, ...detail.chartOpts(), crosshair: { mode: 0 }, handleScroll: false, handleScale: false });
+  const s = chart.addCandlestickSeries({ upColor: cssv("--bull"), downColor: cssv("--bear"), borderVisible: false, wickUpColor: cssv("--bull"), wickDownColor: cssv("--bear"), priceFormat: { type: "price", precision: (dmInfo(t.sym) || {}).dec ?? 6, minMove: (dmInfo(t.sym) || {}).tick || 0.000001 } , autoscaleInfoProvider: orig => { const r = orig(); if (!r || !r.priceRange) return r; const lv = [t.stop, t.target, t.entry]; return { ...r, priceRange: { minValue: Math.min(r.priceRange.minValue, ...lv), maxValue: Math.max(r.priceRange.maxValue, ...lv) } }; } });
+  const ch = { chart, s, lines: [] }; dmCharts.set(t.id, ch); dmChartLines(t);
+  try {
+    const start = Math.min(t.t0 - 45 * 60000, Date.now() - 90 * 60000);
+    const k = (await spot(`/api/v3/klines?symbol=${t.sym}&interval=1m&startTime=${start}&limit=1000`)).map(parseK);
+    if (dmCharts.get(t.id) !== ch) return;
+    s.setData(k.map(c => ({ time: (c[0] + IST) / 1000, open: c[1], high: c[2], low: c[3], close: c[4] })));
+    const et = Math.floor(t.t0 / 60000) * 60000; s.setMarkers([{ time: (et + IST) / 1000, position: t.side === "bull" ? "belowBar" : "aboveBar", color: cssv("--info"), shape: t.side === "bull" ? "arrowUp" : "arrowDown", text: "Demo entry" }]);
+    chart.timeScale().fitContent();
+  } catch (e) { console.warn("demo chart", e.message); }
+}
+function dmChartLines(t) {
+  const ch = dmCharts.get(t.id); if (!ch) return; for (const l of ch.lines) ch.s.removePriceLine(l);
+  ch.lines = [[t.entry, "--info", "Entry", 0], [t.stop, "--bear", t.be ? "Stop (BE)" : "Stop", 2], [t.target, "--bull", `Target ${t.rr}R`, 2]].map(([price, c, title, ls]) => ch.s.createPriceLine({ price, color: cssv(c), lineWidth: 1, lineStyle: ls, axisLabelVisible: true, title }));
+}
+function dmCSV() {
+  const head = ["closed_ist", "opened_ist", "coin", "side", "entry", "stop", "target", "exit", "qty", "result", "R", "pnl_usd", "fees_usd", "mfe_R", "mae_R", "held_min", "exit_reason", "resolved", "source"];
+  const rows = DM.closed.map(t => [dmh(t.t1), dmh(t.t0), t.sym, t.side === "bull" ? "long" : "short", t.entry, t.stop0, t.target, t.exit, t.qty, t.net > 0 ? "win" : "loss", t.R.toFixed(3), t.net.toFixed(4), t.fees.toFixed(4), t.mfe.toFixed(2), t.mae.toFixed(2), Math.round((t.t1 - t.t0) / 60000), t.why, t.how, t.src]);
+  const csv = [head, ...rows].map(r => r.map(x => /[",\n]/.test(String(x)) ? `"${String(x).replace(/"/g, '""')}"` : x).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `demo-trades-${istDay()}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+const demoBtn = (sym, side, p, src, cls2) => `<button class="tmbtn demob ${cls2 || ""}" data-demo="${sym}" data-side="${side || "bull"}"${p ? ` data-entry="${p.entry}" data-stop="${p.stop}"` : ""} data-src="${esc(src || "")}" title="Paper-trade this (DEMO, no real money)">▶ Demo</button>`;
+
+/* ---------- hooks into other views ---------- */
+const _tmRes = tmResultHTML;
+tmResultHTML = function () { const h = _tmRes(); const f = TM.res && TM.res.f; if (!f) return h;
+  return `<div class="card dmtm" style="margin-top:14px"><div><b>Want to watch it live?</b> <span class="mut">Start a paper trade of this ${f.side === "bull" ? "long" : "short"} on ${baseOf(f.sym)} now.</span> ${DEMO_TAG}</div><button class="btn demo-btn" data-tmdemo="1">▶ Demo entry</button></div>` + h; };
+const _dRefresh2 = detail.refresh.bind(detail);
+detail.refresh = function () {
+  _dRefresh2(); const c = this.c, el = $("#drisk"); if (!c || !el || el.querySelector("[data-demo]")) return;
+  const ev = S.tf === "5m" ? (c.ev || this.ev) : this.ev, p = ev && ev.plan;
+  el.insertAdjacentHTML("beforeend", `<button class="btn demo-btn" style="margin-top:8px;width:100%" data-demo="${c.sym}" data-side="${ev ? ev.want : c.bias || "bull"}"${p ? ` data-entry="${p.entry}" data-stop="${p.stop}"` : ""} data-src="coin detail ${S.tf}">▶ Demo entry <span class="mut">(no real money)</span></button>`);
+};
+const _dShell2 = detail.renderShell.bind(detail);
+detail.renderShell = function () { _dShell2(); const c = this.c; const tf = $("#tfseg"); if (tf) tf.insertAdjacentHTML("beforebegin", `<button class="iconbtn tmhead demob" data-demo="${c.sym}" data-side="${c.ev ? c.ev.want : c.bias || "bull"}"${c.ev && c.ev.plan ? ` data-entry="${c.ev.plan.entry}" data-stop="${c.ev.plan.stop}"` : ""} data-src="coin detail">▶ Demo</button>`); };
+
+document.addEventListener("click", e => {
+  const d = e.target.closest("[data-demo]");
+  if (d) { e.stopPropagation(); e.preventDefault(); openDemo({ sym: d.dataset.demo, side: d.dataset.side, entry: d.dataset.entry, stop: d.dataset.stop, target: d.dataset.target, src: d.dataset.src || "signal", useSig: !!d.dataset.entry }); return; }
+  if (e.target.closest("#demotick")) { setTab("demo"); window.scrollTo(0, 0); return; }
+  if (e.target.closest("[data-demo-new]")) { e.preventDefault(); openDemo({ src: "manual" }); return; }
+  const cr = e.target.closest("[data-crdemo]"); if (cr && CR.A) { e.stopPropagation(); e.preventDefault(); const s = CR.A.setups[+cr.dataset.crdemo]; if (s) openDemo({ sym: CR.sym, side: s.side, entry: s.p.entry, stop: s.p.stop, src: `coin report ${s.tf} setup`, useSig: true }); return; }
+  const tmd = e.target.closest("[data-tmdemo]"); if (tmd && TM.res) { e.stopPropagation(); e.preventDefault(); const f = TM.res.f, c = S.coins.get(f.sym), pl = c && c.ev && c.ev.plan && c.ev.want === f.side ? c.ev.plan : null;
+    openDemo({ sym: f.sym, side: f.side, entry: f.entry || (pl && pl.entry), stop: f.stop || (pl && pl.stop), tmode: f.mode === "ob" && (+f.rr === 2 || +f.rr === 4.6) ? String(+f.rr) : "2", src: `Time Machine ${f.tf}`, useSig: !!(f.entry || pl) }); return; }
+  const cl = e.target.closest("[data-dmclose]"); if (cl) { e.preventDefault(); const t = DM.open.find(x => x.id === +cl.dataset.dmclose); if (t) dmClose(t, t.last || t.entry, "Closed by you", Date.now(), "manual"); return; }
+  if (!dmSheet) { if (e.target.id === "dm-csv") dmCSV(); if (e.target.id === "dm-reset" && confirm("Reset the demo account? This deletes all open and closed demo trades in this browser.")) { DM.open = []; DM.closed = []; dmSave(); dmSync(); renderDemo(); } return; }
+  const id = e.target.id;
+  if (id === "dm-x" || id === "dm-cancel" || e.target.id === "dmsheet") { dmSheet = null; dmRenderSheet(); return; }
+  if (id === "dm-go") { dmStart(); return; }
+  if (id === "dm-load") { const v = ($("#dm-sym").value || "").trim().toUpperCase().replace(/\/?USDT$/, ""); if (v) dmSheetSym(v + "USDT"); return; }
+  const en = e.target.closest("[data-dmentry]"); if (en) { dmSheet.useSig = en.dataset.dmentry === "sig"; dmRenderSheet(); }
+}, true);
+document.addEventListener("change", e => {
+  const id = e.target.id;
+  if (id === "dm-be") { DM.be = e.target.checked; dmSave(); }
+  if (id === "dm-pin") { DM.pin = e.target.checked; dmSave(); }
+  if (!dmSheet) return;
+  if (id === "dm-side") { dmSheet.side = e.target.value; if (dmSheet.live && (dmSheet.stop - dmSheet.live) * (dmSheet.side === "bull" ? 1 : -1) >= 0) { dmSheet.stop = +(dmSheet.live * (dmSheet.side === "bull" ? 0.99 : 1.01)).toPrecision(6); dmSheet.sigEntry = null; dmSheet.useSig = false; } dmRenderSheet(); }
+  if (id === "dm-tmode") { dmSheet.tmode = e.target.value; dmRenderSheet(); }
+  if (id === "dm-stop") { dmSheet.stop = +e.target.value; dmRenderSheet(); }
+  if (id === "dm-custom") { dmSheet.custom = +e.target.value; dmRenderSheet(); }
+  if (id === "dm-sym" && dmSheet.manual) { const v = (e.target.value || "").trim().toUpperCase().replace(/\/?USDT$/, ""); if (v && S.info.has(v + "USDT")) dmSheetSym(v + "USDT"); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "dm-sym") { e.preventDefault(); $("#dm-load") ? $("#dm-load").click() : null; } if (e.key === "Escape" && dmSheet) { dmSheet = null; dmRenderSheet(); } });
+let dmHiddenAt = 0;
+document.addEventListener("visibilitychange", () => { if (document.hidden) { dmHiddenAt = Date.now(); dmSave(); } else if (DM.open.length && Date.now() - dmHiddenAt > 20000) dmCatchUp("reopen"); });
+window.addEventListener("pagehide", dmSave);
+setInterval(() => { if (!document.hidden) dmTick(); }, 1000);
+setInterval(() => { if (!document.hidden && DM.open.length) { dmSave(); if (!dmStream || !dmStream.ws || dmStream.ws.readyState !== 1 || Date.now() - dmStream.last > 15000) dmCatchUp("catchup"); } }, 30000);
+// boot: resolve anything that happened while the page was closed
+if (DM.open.length) dmCatchUp("reopen").then(dmSync); else dmSync();
+window.DM = DM;
 boot();
 </script>
 </body></html>
